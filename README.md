@@ -15,6 +15,9 @@ https://bitbucket.org/cybertools/scapy-radio/src
 Killerbee
 https://github.com/riverloopsec/killerbee
 
+GNU Radio block
+https://github.com/bastibl/gr-ieee802-15-4
+
 After installing both tools please copy the files located in the Scapy folder and copy it to your local scapy directory.
 
 #############
