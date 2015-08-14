@@ -25,6 +25,16 @@ Hardware Requirements
 #############
 For the tool usage a SDR is required. Our GNU radio block is designed for the usage with USRP but can be easily modified to support other SDR as well. For the indirect data transfer feature we use Raspberry Pi with Raspbee.
 
+#############
+RaspBee Setup
+#############
+The firmware for the RaspBee is based on uracoli, the source package can be downloaded here:
+http://download.savannah.nongnu.org/releases/uracoli/uracoli-src-0.4.2.zip
+
+For compiling the firmware, you need a toolchain which can be downloaded from Atmel:
+http://www.atmel.com/tools/ATMELAVRTOOLCHAINFORLINUX.aspx (avr8-gnu-toolchain-linux_x86_64)
+
+Build (and upload,flash and reset) using the make.sh script.
 
 #############
 Execution
