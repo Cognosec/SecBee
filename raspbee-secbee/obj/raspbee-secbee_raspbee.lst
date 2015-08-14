@@ -1,0 +1,852 @@
+   1               		.file	"raspbee-secbee.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__RAMPZ__ = 0x3b
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.text
+   9               	.Ltext0:
+  10               		.cfi_sections	.debug_frame
+  11               		.section	.text.startup,"ax",@progbits
+  12               	.global	main
+  14               	main:
+  15               	.LFB34:
+  16               		.file 1 "raspbee-secbee.c"
+   1:raspbee-secbee.c **** #include "board.h"
+   2:raspbee-secbee.c **** #include "transceiver.h"
+   3:raspbee-secbee.c **** #include "ioutil.h"
+   4:raspbee-secbee.c **** #include "raspbee-secbee.h"
+   5:raspbee-secbee.c **** #include "hif.h"
+   6:raspbee-secbee.c **** 
+   7:raspbee-secbee.c **** static volatile bool tx_in_progress;
+   8:raspbee-secbee.c **** static volatile uint8_t tx_cnt, fail_cnt;
+   9:raspbee-secbee.c **** static uint8_t *txfrm;
+  10:raspbee-secbee.c **** static int framelen = 0;
+  11:raspbee-secbee.c **** 
+  12:raspbee-secbee.c **** #define SEQ_OFFSET     (2)
+  13:raspbee-secbee.c **** #define TX_FAIL_OFFSET (7)
+  14:raspbee-secbee.c **** #define TX_SRAM_OFFSET (1)
+  15:raspbee-secbee.c **** 
+  16:raspbee-secbee.c **** int main(void)
+  17:raspbee-secbee.c **** {
+  17               		.loc 1 17 0
+  18               		.cfi_startproc
+  19 0000 CF93      		push r28
+  20               	.LCFI0:
+  21               		.cfi_def_cfa_offset 4
+  22               		.cfi_offset 28, -3
+  23 0002 DF93      		push r29
+  24               	.LCFI1:
+  25               		.cfi_def_cfa_offset 5
+  26               		.cfi_offset 29, -4
+  27 0004 CDB7      		in r28,__SP_L__
+  28 0006 DEB7      		in r29,__SP_H__
+  29               	.LCFI2:
+  30               		.cfi_def_cfa_register 28
+  31 0008 CF5F      		subi r28,-1
+  32 000a D109      		sbc r29,__zero_reg__
+  33               	.LCFI3:
+  34               		.cfi_def_cfa_offset 260
+  35 000c 0FB6      		in __tmp_reg__,__SREG__
+  36 000e F894      		cli
+  37 0010 DEBF      		out __SP_H__,r29
+  38 0012 0FBE      		out __SREG__,__tmp_reg__
+  39 0014 CDBF      		out __SP_L__,r28
+  40               	/* prologue: function */
+  41               	/* frame size = 255 */
+  42               	/* stack size = 257 */
+  43               	.L__stack_usage = 257
+  44               	.LVL0:
+  45               	.LBB15:
+  46               	.LBB16:
+  47               	.LBB17:
+  48               		.file 2 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h"
+   1:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    All rights reserved.
+   5:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+   6:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+   9:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    * Redistributions of source code must retain the above copyright
+  10:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  12:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****      the documentation and/or other materials provided with the
+  15:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****      distribution.
+  16:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  17:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****      contributors may be used to endorse or promote products derived
+  19:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****      from this software without specific prior written permission.
+  20:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  21:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  33:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /* $Id$ */
+  34:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  35:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #ifndef _UTIL_DELAY_H_
+  36:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #define _UTIL_DELAY_H_ 1
+  37:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  38:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #ifndef __HAS_DELAY_CYCLES
+  39:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #define __HAS_DELAY_CYCLES 1
+  40:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #endif
+  41:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  42:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #include <inttypes.h>
+  43:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #include <util/delay_basic.h>
+  44:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #include <math.h>
+  45:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  46:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /** \file */
+  47:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  48:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     \code
+  49:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  50:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     //#define F_CPU 14.7456E6
+  51:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     #include <util/delay.h>
+  52:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     \endcode
+  53:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  54:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     \note As an alternative method, it is possible to pass the
+  55:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  56:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     Obviously, in that case, no \c \#define statement should be
+  57:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     used.
+  58:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  59:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     The functions in this header file are wrappers around the basic
+  60:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  61:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     convenience functions where actual time values can be specified
+  62:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  63:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     that compile-time constant expressions will be eliminated by
+  64:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     compiler optimization so floating-point expressions can be used
+  65:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  66:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     frequency passed by the macro F_CPU.
+  67:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  68:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     \note In order for these functions to work as intended, compiler
+  69:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  70:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     <em>must</em> be an expression that is a known constant at
+  71:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     compile-time.  If these requirements are not met, the resulting
+  72:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     delay will be much longer (and basically unpredictable), and
+  73:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     applications that otherwise do not use floating-point calculations
+  74:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     will experience severe code bloat by the floating-point library
+  75:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     routines linked into the application.
+  76:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  77:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     The functions available allow the specification of microsecond, and
+  78:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     millisecond delays directly, using the application-supplied macro
+  79:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  80:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  81:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** */
+  82:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  83:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #if !defined(__DOXYGEN__)
+  84:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  85:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  86:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #endif
+  87:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  88:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #ifndef F_CPU
+  89:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /* prevent compiler error by supplying a default */
+  90:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  91:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** # define F_CPU 1000000UL
+  92:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #endif
+  93:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  94:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #ifndef __OPTIMIZE__
+  95:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  96:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #endif
+  97:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+  98:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+  99:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 100:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 101:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #  include <math.h>
+ 102:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #endif
+ 103:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 104:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /**
+ 105:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    \ingroup util_delay
+ 106:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 107:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+ 108:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 109:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+ 110:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 111:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 112:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 113:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 114:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    When the user request delay which exceed the maximum possible one,
+ 115:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 116:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 117:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 118:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    user will not be informed about decreased resolution.
+ 119:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 120:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    If the avr-gcc toolchain has __builtin_avr_delay_cycles(unsigned long)
+ 121:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    support, maximal possible delay is 4294967.295 ms/ F_CPU in MHz. For
+ 122:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    values greater than the maximal possible delay, overflows results in
+ 123:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    no delay i.e., 0ms.
+ 124:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 125:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Conversion of __us into clock cycles may not always result in integer.
+ 126:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    By default, the clock cycles rounded up to next integer. This ensures that
+ 127:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    the user gets atleast __us microseconds of delay.
+ 128:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 129:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Alternatively, user can define __DELAY_ROUND_DOWN__ and __DELAY_ROUND_CLOSEST__
+ 130:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    to round down and round to closest integer.
+ 131:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 132:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Note: The new implementation of _delay_ms(double __ms) with 
+ 133:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****     __builtin_avr_delay_cycles(unsigned long) support is not backward compatible. 
+ 134:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    User can define __DELAY_BACKWARD_COMPATIBLE__ to get a backward compatible delay.
+ 135:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Also, the backward compatible
+ 136:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    algorithm will be chosen if the code is compiled in a <em>freestanding
+ 137:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    environment</em> (GCC option \c -ffreestanding), as the math functions
+ 138:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    required for rounding are not available to the compiler then.
+ 139:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 140:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****  */
+ 141:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** void
+ 142:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** _delay_ms(double __ms)
+ 143:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** {
+ 144:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	double __tmp ; 
+ 145:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** #if __HAS_DELAY_CYCLES && defined(__OPTIMIZE__) && \
+ 146:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   !defined(__DELAY_BACKWARD_COMPATIBLE__) &&	   \
+ 147:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****   __STDC_HOSTED__
+ 148:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	uint32_t __ticks_dc;
+ 149:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	extern void __builtin_avr_delay_cycles(unsigned long);
+ 150:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	__tmp = ((F_CPU) / 1e3) * __ms;
+ 151:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 152:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	#if defined(__DELAY_ROUND_DOWN__)
+ 153:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)fabs(__tmp);
+ 154:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 155:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	#elif defined(__DELAY_ROUND_CLOSEST__)
+ 156:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(fabs(__tmp)+0.5);
+ 157:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 158:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	#else
+ 159:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 		//round up by default
+ 160:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+ 161:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	#endif
+ 162:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
+ 163:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
+  49               		.loc 2 163 0
+  50 0016 8FE1      		ldi r24,lo8(19999)
+  51 0018 9EE4      		ldi r25,hi8(19999)
+  52 001a 0197      		1: sbiw r24,1
+  53 001c 01F4      		brne 1b
+  54 001e 00C0      		rjmp .
+  55 0020 0000      		nop
+  56               	.LBE17:
+  57               	.LBE16:
+  58               	.LBE15:
+  18:raspbee-secbee.c ****     uint32_t panid = 0x35b6; //panid of the network
+  19:raspbee-secbee.c ****     uint32_t shortaddr = 0x0000; //shortaddr of the hub
+  20:raspbee-secbee.c ****     int channel = 20; //channel for the network
+  21:raspbee-secbee.c **** 
+  22:raspbee-secbee.c ****     int inchar;
+  23:raspbee-secbee.c ****     const uint32_t br = HIF_DEFAULT_BAUDRATE;
+  24:raspbee-secbee.c ****     trx_regval_t rval;
+  25:raspbee-secbee.c **** 
+  26:raspbee-secbee.c ****     /* This will stop the application before initializing the radio transceiver
+  27:raspbee-secbee.c ****      * (ISP issue with MISO pin, see FAQ)
+  28:raspbee-secbee.c ****      */
+  29:raspbee-secbee.c ****     trap_if_key_pressed();
+  30:raspbee-secbee.c **** 
+  31:raspbee-secbee.c ****     /* Step 0: init MCU peripherals */
+  32:raspbee-secbee.c ****     LED_INIT();
+  59               		.loc 1 32 0
+  60 0022 579A      		sbi 0xa,7
+  61 0024 9A9A      		sbi 0x13,2
+  62 0026 5F9A      		sbi 0xb,7
+  63 0028 A29A      		sbi 0x14,2
+  33:raspbee-secbee.c ****     trx_io_init(SPI_RATE_1_2);
+  64               		.loc 1 33 0
+  65 002a 84E0      		ldi r24,lo8(4)
+  66 002c 0E94 0000 		call trx_io_init
+  67               	.LVL1:
+  34:raspbee-secbee.c ****     LED_SET_VALUE(LED_MAX_VALUE);
+  68               		.loc 1 34 0
+  69 0030 5F98      		cbi 0xb,7
+  70 0032 A298      		cbi 0x14,2
+  35:raspbee-secbee.c ****     LED_SET_VALUE(0);
+  71               		.loc 1 35 0
+  72 0034 5F9A      		sbi 0xb,7
+  73 0036 A29A      		sbi 0x14,2
+  36:raspbee-secbee.c **** 
+  37:raspbee-secbee.c ****     /* Step 1: initialize the transceiver */
+  38:raspbee-secbee.c ****     TRX_RESET_LOW();
+  74               		.loc 1 38 0
+  75 0038 8091 3901 		lds r24,313
+  76 003c 8E7F      		andi r24,lo8(-2)
+  77 003e 8093 3901 		sts 313,r24
+  39:raspbee-secbee.c ****     TRX_SLPTR_LOW();
+  78               		.loc 1 39 0
+  79 0042 8091 3901 		lds r24,313
+  80 0046 8D7F      		andi r24,lo8(-3)
+  81 0048 8093 3901 		sts 313,r24
+  82               	.LVL2:
+  83               	.LBB18:
+  84               	.LBB19:
+  85               		.loc 2 163 0
+  86 004c 90E1      		ldi r25,lo8(16)
+  87 004e 9A95      		1: dec r25
+  88 0050 01F4      		brne 1b
+  89               	.LBE19:
+  90               	.LBE18:
+  40:raspbee-secbee.c ****     DELAY_US(TRX_RESET_TIME_US);
+  41:raspbee-secbee.c ****     TRX_RESET_HIGH();
+  91               		.loc 1 41 0
+  92 0052 8091 3901 		lds r24,313
+  93 0056 8160      		ori r24,lo8(1)
+  94 0058 8093 3901 		sts 313,r24
+  42:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_TRX_OFF);
+  95               		.loc 1 42 0
+  96 005c 68E0      		ldi r22,lo8(8)
+  97 005e 82E0      		ldi r24,lo8(2)
+  98 0060 0E94 0000 		call trx_reg_write
+  99               	.LVL3:
+ 100               	.LBB20:
+ 101               	.LBB21:
+ 102               		.loc 2 163 0
+ 103 0064 EFE7      		ldi r30,lo8(815999)
+ 104 0066 F3E7      		ldi r31,hi8(815999)
+ 105 0068 2CE0      		ldi r18,hlo8(815999)
+ 106 006a E150      		1: subi r30,1
+ 107 006c F040      		sbci r31,0
+ 108 006e 2040      		sbci r18,0
+ 109 0070 01F4      		brne 1b
+ 110 0072 00C0      		rjmp .
+ 111 0074 0000      		nop
+ 112               	.LBE21:
+ 113               	.LBE20:
+  43:raspbee-secbee.c ****     DELAY_MS(TRX_INIT_TIME_US);
+  44:raspbee-secbee.c ****     rval = trx_bit_read(SR_TRX_STATUS);
+ 114               		.loc 1 44 0
+ 115 0076 40E0      		ldi r20,0
+ 116 0078 6FE1      		ldi r22,lo8(31)
+ 117 007a 81E0      		ldi r24,lo8(1)
+ 118 007c 0E94 0000 		call trx_bit_read
+ 119               	.LVL4:
+  45:raspbee-secbee.c ****     ERR_CHECK(TRX_OFF!=rval);
+ 120               		.loc 1 45 0
+ 121 0080 8830      		cpi r24,lo8(8)
+ 122 0082 01F0      		breq .+2
+ 123 0084 00C0      		rjmp .L3
+  46:raspbee-secbee.c ****     LED_SET_VALUE(1);
+ 124               		.loc 1 46 0 discriminator 1
+ 125 0086 5F98      		cbi 0xb,7
+ 126 0088 A29A      		sbi 0x14,2
+  47:raspbee-secbee.c **** 
+  48:raspbee-secbee.c ****     /* Step 2: setup transmitter
+  49:raspbee-secbee.c ****      * - configure radio channel
+  50:raspbee-secbee.c ****      * - enable transmitters automatic crc16 generation
+  51:raspbee-secbee.c ****      * - go into RX state,
+  52:raspbee-secbee.c ****      * - enable "transmit end" IRQ
+  53:raspbee-secbee.c ****      */
+  54:raspbee-secbee.c ****     trx_bit_write(SR_CHANNEL,channel);
+ 127               		.loc 1 54 0 discriminator 1
+ 128 008a 24E1      		ldi r18,lo8(20)
+ 129 008c 40E0      		ldi r20,0
+ 130 008e 6FE1      		ldi r22,lo8(31)
+ 131 0090 0E94 0000 		call trx_bit_write
+ 132               	.LVL5:
+  55:raspbee-secbee.c ****     trx_bit_write(SR_TX_AUTO_CRC_ON,1); //with crc
+ 133               		.loc 1 55 0 discriminator 1
+ 134 0094 21E0      		ldi r18,lo8(1)
+ 135 0096 45E0      		ldi r20,lo8(5)
+ 136 0098 60E2      		ldi r22,lo8(32)
+ 137 009a 84E0      		ldi r24,lo8(4)
+ 138 009c 0E94 0000 		call trx_bit_write
+ 139               	.LVL6:
+  56:raspbee-secbee.c **** 
+  57:raspbee-secbee.c ****     /* for sending acks */
+  58:raspbee-secbee.c ****     trx_reg_write(RG_PAN_ID_0,(panid&0xff));
+ 140               		.loc 1 58 0 discriminator 1
+ 141 00a0 66EB      		ldi r22,lo8(-74)
+ 142 00a2 82E2      		ldi r24,lo8(34)
+ 143 00a4 0E94 0000 		call trx_reg_write
+ 144               	.LVL7:
+  59:raspbee-secbee.c ****     trx_reg_write(RG_PAN_ID_1,(panid>>8));
+ 145               		.loc 1 59 0 discriminator 1
+ 146 00a8 65E3      		ldi r22,lo8(53)
+ 147 00aa 83E2      		ldi r24,lo8(35)
+ 148 00ac 0E94 0000 		call trx_reg_write
+ 149               	.LVL8:
+  60:raspbee-secbee.c **** 
+  61:raspbee-secbee.c ****     trx_reg_write(RG_SHORT_ADDR_0,(shortaddr&0xff));
+ 150               		.loc 1 61 0 discriminator 1
+ 151 00b0 60E0      		ldi r22,0
+ 152 00b2 80E2      		ldi r24,lo8(32)
+ 153 00b4 0E94 0000 		call trx_reg_write
+ 154               	.LVL9:
+  62:raspbee-secbee.c ****     trx_reg_write(RG_SHORT_ADDR_1,(shortaddr>>8));
+ 155               		.loc 1 62 0 discriminator 1
+ 156 00b8 60E0      		ldi r22,0
+ 157 00ba 81E2      		ldi r24,lo8(33)
+ 158 00bc 0E94 0000 		call trx_reg_write
+ 159               	.LVL10:
+  63:raspbee-secbee.c **** 
+  64:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_RX_AACK_ON);
+ 160               		.loc 1 64 0 discriminator 1
+ 161 00c0 66E1      		ldi r22,lo8(22)
+ 162 00c2 82E0      		ldi r24,lo8(2)
+ 163 00c4 0E94 0000 		call trx_reg_write
+ 164               	.LVL11:
+  65:raspbee-secbee.c ****     //trx_bit_write(SR_AACK_ACK_TIME,1); //respond with ack after 2 instead of 16 syms
+  66:raspbee-secbee.c **** 
+  67:raspbee-secbee.c **** #if defined(TRX_IRQ_TRX_END)
+  68:raspbee-secbee.c ****     trx_reg_write(RG_IRQ_MASK,TRX_IRQ_TRX_END);
+  69:raspbee-secbee.c **** #elif defined(TRX_IRQ_TX_END)
+  70:raspbee-secbee.c ****     trx_reg_write(RG_IRQ_MASK,TRX_IRQ_TX_END);
+ 165               		.loc 1 70 0 discriminator 1
+ 166 00c8 60E4      		ldi r22,lo8(64)
+ 167 00ca 8EE0      		ldi r24,lo8(14)
+ 168 00cc 0E94 0000 		call trx_reg_write
+ 169               	.LVL12:
+  71:raspbee-secbee.c **** #else
+  72:raspbee-secbee.c **** #  error "Unknown IRQ bits"
+  73:raspbee-secbee.c **** #endif
+  74:raspbee-secbee.c ****     sei();
+ 170               		.loc 1 74 0 discriminator 1
+ 171               	/* #APP */
+ 172               	 ;  74 "raspbee-secbee.c" 1
+ 173 00d0 7894      		sei
+ 174               	 ;  0 "" 2
+  75:raspbee-secbee.c ****     LED_SET_VALUE(2);
+ 175               		.loc 1 75 0 discriminator 1
+ 176               	/* #NOAPP */
+ 177 00d2 5F9A      		sbi 0xb,7
+ 178 00d4 A298      		cbi 0x14,2
+  76:raspbee-secbee.c **** 
+  77:raspbee-secbee.c ****     /* setting up UART and adjusting the baudrate */
+  78:raspbee-secbee.c ****     hif_init(br);
+ 179               		.loc 1 78 0 discriminator 1
+ 180 00d6 60E0      		ldi r22,0
+ 181 00d8 76E9      		ldi r23,lo8(-106)
+ 182 00da 80E0      		ldi r24,0
+ 183 00dc 90E0      		ldi r25,0
+ 184 00de 0E94 0000 		call hif_init
+ 185               	.LVL13:
+  79:raspbee-secbee.c **** 
+  80:raspbee-secbee.c ****     /* Step 3: wait for ans send frame (indirect data transfer) */
+  81:raspbee-secbee.c ****     tx_cnt = 0;
+ 186               		.loc 1 81 0 discriminator 1
+ 187 00e2 1092 0000 		sts tx_cnt,__zero_reg__
+  82:raspbee-secbee.c ****     tx_in_progress = false;
+ 188               		.loc 1 82 0 discriminator 1
+ 189 00e6 1092 0000 		sts tx_in_progress,__zero_reg__
+  83:raspbee-secbee.c ****     LED_SET_VALUE(0);
+ 190               		.loc 1 83 0 discriminator 1
+ 191 00ea 5F9A      		sbi 0xb,7
+ 192 00ec A29A      		sbi 0x14,2
+ 193 00ee 8E01      		movw r16,r28
+ 194 00f0 0F5F      		subi r16,-1
+ 195 00f2 1F4F      		sbci r17,-1
+ 196               	.L4:
+  84:raspbee-secbee.c **** 
+  85:raspbee-secbee.c ****     uint8_t line[255];
+  86:raspbee-secbee.c ****     bool received;
+  87:raspbee-secbee.c **** 
+  88:raspbee-secbee.c ****     while(1)
+  89:raspbee-secbee.c ****     {
+  90:raspbee-secbee.c ****         received = false;
+  91:raspbee-secbee.c ****         while(received==false)
+  92:raspbee-secbee.c ****         {
+  93:raspbee-secbee.c ****             inchar = hif_getc();
+ 197               		.loc 1 93 0 discriminator 1
+ 198 00f4 0E94 0000 		call hif_getc
+ 199               	.LVL14:
+  94:raspbee-secbee.c ****             if (EOF != inchar)
+  95:raspbee-secbee.c ****             {
+  96:raspbee-secbee.c ****                 if (inchar =='x')
+ 200               		.loc 1 96 0 discriminator 1
+ 201 00f8 8837      		cpi r24,120
+ 202 00fa 9105      		cpc r25,__zero_reg__
+ 203 00fc 01F4      		brne .L4
+ 204               	.L16:
+ 205               	.LBB22:
+  97:raspbee-secbee.c ****                 {
+  98:raspbee-secbee.c ****                     do
+  99:raspbee-secbee.c ****                     {
+ 100:raspbee-secbee.c ****                         inchar = hif_getc();
+ 206               		.loc 1 100 0
+ 207 00fe 0E94 0000 		call hif_getc
+ 208               	.LVL15:
+ 101:raspbee-secbee.c ****                     }
+ 102:raspbee-secbee.c ****                     while (EOF == inchar);
+ 209               		.loc 1 102 0
+ 210 0102 8F3F      		cpi r24,-1
+ 211 0104 EFEF      		ldi r30,-1
+ 212 0106 9E07      		cpc r25,r30
+ 213 0108 01F0      		breq .L16
+ 103:raspbee-secbee.c **** 
+ 104:raspbee-secbee.c ****                     framelen = inchar;
+ 214               		.loc 1 104 0
+ 215 010a 9093 0000 		sts framelen+1,r25
+ 216 010e 8093 0000 		sts framelen,r24
+ 217               	.LVL16:
+ 105:raspbee-secbee.c ****                     //PRINTF("Receiving frame from serial, len: %d\n\r", framelen);
+ 106:raspbee-secbee.c ****                     int j;
+ 107:raspbee-secbee.c ****                     for(j=0;j<framelen;j++)
+ 218               		.loc 1 107 0
+ 219 0112 7801      		movw r14,r16
+ 220               	.LVL17:
+ 221               	.L7:
+ 222               		.loc 1 107 0 is_stmt 0 discriminator 1
+ 223 0114 8091 0000 		lds r24,framelen
+ 224 0118 9091 0000 		lds r25,framelen+1
+ 225               	.LVL18:
+ 226 011c 9701      		movw r18,r14
+ 227 011e 201B      		sub r18,r16
+ 228 0120 310B      		sbc r19,r17
+ 229 0122 2817      		cp r18,r24
+ 230 0124 3907      		cpc r19,r25
+ 231 0126 04F4      		brge .L19
+ 232               	.L9:
+ 108:raspbee-secbee.c ****                     {
+ 109:raspbee-secbee.c ****                         do
+ 110:raspbee-secbee.c ****                         {
+ 111:raspbee-secbee.c ****                             inchar = hif_getc();
+ 233               		.loc 1 111 0 is_stmt 1
+ 234 0128 0E94 0000 		call hif_getc
+ 235               	.LVL19:
+ 112:raspbee-secbee.c ****                         }
+ 113:raspbee-secbee.c ****                         while (EOF == inchar);
+ 236               		.loc 1 113 0
+ 237 012c 8F3F      		cpi r24,-1
+ 238 012e FFEF      		ldi r31,-1
+ 239 0130 9F07      		cpc r25,r31
+ 240 0132 01F0      		breq .L9
+ 114:raspbee-secbee.c **** 
+ 115:raspbee-secbee.c ****                         line[j] = inchar;
+ 241               		.loc 1 115 0
+ 242 0134 F701      		movw r30,r14
+ 243 0136 8193      		st Z+,r24
+ 244 0138 7F01      		movw r14,r30
+ 245               	.LVL20:
+ 246 013a 00C0      		rjmp .L7
+ 247               	.LVL21:
+ 248               	.L19:
+ 116:raspbee-secbee.c ****                     }
+ 117:raspbee-secbee.c **** 
+ 118:raspbee-secbee.c ****                     //PRINTF("Frame as string: %s\n\r", line);
+ 119:raspbee-secbee.c ****                     received = true;
+ 120:raspbee-secbee.c **** 
+ 121:raspbee-secbee.c ****                     trx_bit_write(SR_AACK_SET_PD,1);
+ 249               		.loc 1 121 0
+ 250 013c 21E0      		ldi r18,lo8(1)
+ 251 013e 45E0      		ldi r20,lo8(5)
+ 252 0140 60E2      		ldi r22,lo8(32)
+ 253 0142 8EE2      		ldi r24,lo8(46)
+ 254 0144 0E94 0000 		call trx_bit_write
+ 255               	.LVL22:
+ 122:raspbee-secbee.c **** 
+ 123:raspbee-secbee.c ****                     int i;
+ 124:raspbee-secbee.c ****                     txfrm = malloc(framelen*sizeof(uint8_t));
+ 256               		.loc 1 124 0
+ 257 0148 E090 0000 		lds r14,framelen
+ 258 014c F090 0000 		lds r15,framelen+1
+ 259               	.LVL23:
+ 260 0150 C701      		movw r24,r14
+ 261 0152 0E94 0000 		call malloc
+ 262               	.LVL24:
+ 263 0156 8093 0000 		sts txfrm,r24
+ 264 015a 9093 0000 		sts txfrm+1,r25
+ 265               	.LVL25:
+ 266 015e FC01      		movw r30,r24
+ 125:raspbee-secbee.c ****                     for(i=0;i<framelen;i++)
+ 267               		.loc 1 125 0
+ 268 0160 D801      		movw r26,r16
+ 269               	.LVL26:
+ 270               	.L11:
+ 271 0162 CD01      		movw r24,r26
+ 272 0164 801B      		sub r24,r16
+ 273 0166 910B      		sbc r25,r17
+ 274               		.loc 1 125 0 is_stmt 0 discriminator 1
+ 275 0168 8E15      		cp r24,r14
+ 276 016a 9F05      		cpc r25,r15
+ 277 016c 04F4      		brge .L4
+ 126:raspbee-secbee.c ****                     txfrm[i] = line[i];
+ 278               		.loc 1 126 0 is_stmt 1 discriminator 2
+ 279 016e 8D91      		ld r24,X+
+ 280 0170 8193      		st Z+,r24
+ 281 0172 00C0      		rjmp .L11
+ 282               	.LVL27:
+ 283               	.L3:
+ 284 0174 00C0      		rjmp .L3
+ 285               	.LBE22:
+ 286               		.cfi_endproc
+ 287               	.LFE34:
+ 289               		.text
+ 290               	.global	__vector_63
+ 292               	__vector_63:
+ 293               	.LFB35:
+ 127:raspbee-secbee.c ****                 }
+ 128:raspbee-secbee.c ****             }
+ 129:raspbee-secbee.c ****         }
+ 130:raspbee-secbee.c **** 
+ 131:raspbee-secbee.c ****     }
+ 132:raspbee-secbee.c **** }
+ 133:raspbee-secbee.c **** 
+ 134:raspbee-secbee.c **** #if defined(TRX_IF_RFA1)
+ 135:raspbee-secbee.c **** ISR(TRX24_TX_END_vect)
+ 136:raspbee-secbee.c **** {
+ 294               		.loc 1 136 0
+ 295               		.cfi_startproc
+ 296 0000 1F92      		push r1
+ 297               	.LCFI4:
+ 298               		.cfi_def_cfa_offset 4
+ 299               		.cfi_offset 1, -3
+ 300 0002 0F92      		push r0
+ 301               	.LCFI5:
+ 302               		.cfi_def_cfa_offset 5
+ 303               		.cfi_offset 0, -4
+ 304 0004 0FB6      		in r0,__SREG__
+ 305 0006 0F92      		push r0
+ 306 0008 1124      		clr __zero_reg__
+ 307 000a 0BB6      		in r0,__RAMPZ__
+ 308 000c 0F92      		push r0
+ 309 000e 2F93      		push r18
+ 310               	.LCFI6:
+ 311               		.cfi_def_cfa_offset 6
+ 312               		.cfi_offset 18, -5
+ 313 0010 3F93      		push r19
+ 314               	.LCFI7:
+ 315               		.cfi_def_cfa_offset 7
+ 316               		.cfi_offset 19, -6
+ 317 0012 4F93      		push r20
+ 318               	.LCFI8:
+ 319               		.cfi_def_cfa_offset 8
+ 320               		.cfi_offset 20, -7
+ 321 0014 5F93      		push r21
+ 322               	.LCFI9:
+ 323               		.cfi_def_cfa_offset 9
+ 324               		.cfi_offset 21, -8
+ 325 0016 6F93      		push r22
+ 326               	.LCFI10:
+ 327               		.cfi_def_cfa_offset 10
+ 328               		.cfi_offset 22, -9
+ 329 0018 7F93      		push r23
+ 330               	.LCFI11:
+ 331               		.cfi_def_cfa_offset 11
+ 332               		.cfi_offset 23, -10
+ 333 001a 8F93      		push r24
+ 334               	.LCFI12:
+ 335               		.cfi_def_cfa_offset 12
+ 336               		.cfi_offset 24, -11
+ 337 001c 9F93      		push r25
+ 338               	.LCFI13:
+ 339               		.cfi_def_cfa_offset 13
+ 340               		.cfi_offset 25, -12
+ 341 001e AF93      		push r26
+ 342               	.LCFI14:
+ 343               		.cfi_def_cfa_offset 14
+ 344               		.cfi_offset 26, -13
+ 345 0020 BF93      		push r27
+ 346               	.LCFI15:
+ 347               		.cfi_def_cfa_offset 15
+ 348               		.cfi_offset 27, -14
+ 349 0022 EF93      		push r30
+ 350               	.LCFI16:
+ 351               		.cfi_def_cfa_offset 16
+ 352               		.cfi_offset 30, -15
+ 353 0024 FF93      		push r31
+ 354               	.LCFI17:
+ 355               		.cfi_def_cfa_offset 17
+ 356               		.cfi_offset 31, -16
+ 357               	/* prologue: Signal */
+ 358               	/* frame size = 0 */
+ 359               	/* stack size = 16 */
+ 360               	.L__stack_usage = 16
+ 137:raspbee-secbee.c ****     static volatile trx_regval_t trac_status;
+ 138:raspbee-secbee.c **** 
+ 139:raspbee-secbee.c ****     if (trx_bit_read(SR_AACK_SET_PD)==1)
+ 361               		.loc 1 139 0
+ 362 0026 45E0      		ldi r20,lo8(5)
+ 363 0028 60E2      		ldi r22,lo8(32)
+ 364 002a 8EE2      		ldi r24,lo8(46)
+ 365 002c 0E94 0000 		call trx_bit_read
+ 366               	.LVL28:
+ 367 0030 8130      		cpi r24,lo8(1)
+ 368 0032 01F0      		breq .+2
+ 369 0034 00C0      		rjmp .L21
+ 140:raspbee-secbee.c ****     {
+ 141:raspbee-secbee.c ****         trx_reg_write(RG_TRX_STATE,CMD_FORCE_TRX_OFF);
+ 370               		.loc 1 141 0
+ 371 0036 63E0      		ldi r22,lo8(3)
+ 372 0038 82E0      		ldi r24,lo8(2)
+ 373 003a 0E94 0000 		call trx_reg_write
+ 374               	.LVL29:
+ 142:raspbee-secbee.c ****         trx_reg_write(RG_TRX_STATE,CMD_TX_ARET_ON);
+ 375               		.loc 1 142 0
+ 376 003e 69E1      		ldi r22,lo8(25)
+ 377 0040 82E0      		ldi r24,lo8(2)
+ 378 0042 0E94 0000 		call trx_reg_write
+ 379               	.LVL30:
+ 380               	.LBB23:
+ 381               	.LBB24:
+ 382               		.loc 2 163 0
+ 383 0046 8AE2      		ldi r24,lo8(42)
+ 384 0048 8A95      		1: dec r24
+ 385 004a 01F4      		brne 1b
+ 386 004c 00C0      		rjmp .
+ 387               	.LBE24:
+ 388               	.LBE23:
+ 143:raspbee-secbee.c **** 
+ 144:raspbee-secbee.c ****         DELAY_US(16); /* wait 1 symbol, XXX check this timing */
+ 145:raspbee-secbee.c **** 
+ 146:raspbee-secbee.c ****         TRX_SLPTR_HIGH();
+ 389               		.loc 1 146 0
+ 390 004e 8091 3901 		lds r24,313
+ 391 0052 8260      		ori r24,lo8(2)
+ 392 0054 8093 3901 		sts 313,r24
+ 147:raspbee-secbee.c ****         TRX_SLPTR_LOW();
+ 393               		.loc 1 147 0
+ 394 0058 8091 3901 		lds r24,313
+ 395 005c 8D7F      		andi r24,lo8(-3)
+ 396 005e 8093 3901 		sts 313,r24
+ 148:raspbee-secbee.c **** 
+ 149:raspbee-secbee.c ****         trx_frame_write (framelen, txfrm);
+ 397               		.loc 1 149 0
+ 398 0062 6091 0000 		lds r22,txfrm
+ 399 0066 7091 0000 		lds r23,txfrm+1
+ 400 006a 8091 0000 		lds r24,framelen
+ 401 006e 0E94 0000 		call trx_frame_write
+ 402               	.LVL31:
+ 150:raspbee-secbee.c **** 
+ 151:raspbee-secbee.c ****         trx_bit_write(SR_AACK_SET_PD,0);
+ 403               		.loc 1 151 0
+ 404 0072 20E0      		ldi r18,0
+ 405 0074 45E0      		ldi r20,lo8(5)
+ 406 0076 60E2      		ldi r22,lo8(32)
+ 407 0078 8EE2      		ldi r24,lo8(46)
+ 408 007a 0E94 0000 		call trx_bit_write
+ 409               	.LVL32:
+ 152:raspbee-secbee.c **** 
+ 153:raspbee-secbee.c ****         LED_SET(1);
+ 410               		.loc 1 153 0
+ 411 007e A29A      		sbi 0x14,2
+ 154:raspbee-secbee.c ****         LED_TOGGLE(0);
+ 412               		.loc 1 154 0
+ 413 0080 8BB1      		in r24,0xb
+ 414 0082 8058      		subi r24,lo8(-(-128))
+ 415 0084 8BB9      		out 0xb,r24
+ 155:raspbee-secbee.c **** 
+ 156:raspbee-secbee.c ****         trac_status = trx_bit_read(SR_TRAC_STATUS);
+ 416               		.loc 1 156 0
+ 417 0086 45E0      		ldi r20,lo8(5)
+ 418 0088 60EE      		ldi r22,lo8(-32)
+ 419 008a 82E0      		ldi r24,lo8(2)
+ 420 008c 0E94 0000 		call trx_bit_read
+ 421               	.LVL33:
+ 422 0090 8093 0000 		sts trac_status.2614,r24
+ 157:raspbee-secbee.c ****         tx_in_progress = false;
+ 423               		.loc 1 157 0
+ 424 0094 1092 0000 		sts tx_in_progress,__zero_reg__
+ 158:raspbee-secbee.c ****         if (trac_status != TRAC_SUCCESS)
+ 425               		.loc 1 158 0
+ 426 0098 8091 0000 		lds r24,trac_status.2614
+ 427 009c 8823      		tst r24
+ 428 009e 01F0      		breq .L22
+ 159:raspbee-secbee.c ****         {
+ 160:raspbee-secbee.c ****             fail_cnt++;
+ 429               		.loc 1 160 0
+ 430 00a0 8091 0000 		lds r24,fail_cnt
+ 431 00a4 8F5F      		subi r24,lo8(-(1))
+ 432 00a6 8093 0000 		sts fail_cnt,r24
+ 433 00aa 00C0      		rjmp .L20
+ 434               	.L22:
+ 161:raspbee-secbee.c ****         }
+ 162:raspbee-secbee.c ****         else
+ 163:raspbee-secbee.c ****         {
+ 164:raspbee-secbee.c ****             tx_cnt ++;
+ 435               		.loc 1 164 0
+ 436 00ac 8091 0000 		lds r24,tx_cnt
+ 437 00b0 8F5F      		subi r24,lo8(-(1))
+ 438 00b2 8093 0000 		sts tx_cnt,r24
+ 165:raspbee-secbee.c ****             LED_CLR(1);
+ 439               		.loc 1 165 0
+ 440 00b6 A298      		cbi 0x14,2
+ 441 00b8 00C0      		rjmp .L20
+ 442               	.LVL34:
+ 443               	.L21:
+ 166:raspbee-secbee.c ****         }
+ 167:raspbee-secbee.c ****   }
+ 168:raspbee-secbee.c ****   else
+ 169:raspbee-secbee.c ****   {
+ 170:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_RX_AACK_ON);
+ 444               		.loc 1 170 0
+ 445 00ba 66E1      		ldi r22,lo8(22)
+ 446 00bc 82E0      		ldi r24,lo8(2)
+ 447 00be 0E94 0000 		call trx_reg_write
+ 448               	.LVL35:
+ 449               	.L20:
+ 450               	/* epilogue start */
+ 171:raspbee-secbee.c ****   }
+ 172:raspbee-secbee.c **** 
+ 173:raspbee-secbee.c **** }
+ 451               		.loc 1 173 0
+ 452 00c2 FF91      		pop r31
+ 453 00c4 EF91      		pop r30
+ 454 00c6 BF91      		pop r27
+ 455 00c8 AF91      		pop r26
+ 456 00ca 9F91      		pop r25
+ 457 00cc 8F91      		pop r24
+ 458 00ce 7F91      		pop r23
+ 459 00d0 6F91      		pop r22
+ 460 00d2 5F91      		pop r21
+ 461 00d4 4F91      		pop r20
+ 462 00d6 3F91      		pop r19
+ 463 00d8 2F91      		pop r18
+ 464 00da 0F90      		pop r0
+ 465 00dc 0BBE      		out __RAMPZ__,r0
+ 466 00de 0F90      		pop r0
+ 467 00e0 0FBE      		out __SREG__,r0
+ 468 00e2 0F90      		pop r0
+ 469 00e4 1F90      		pop r1
+ 470 00e6 1895      		reti
+ 471               		.cfi_endproc
+ 472               	.LFE35:
+ 474               		.local	trac_status.2614
+ 475               		.comm	trac_status.2614,1,1
+ 476               		.local	framelen
+ 477               		.comm	framelen,2,1
+ 478               		.local	txfrm
+ 479               		.comm	txfrm,2,1
+ 480               		.local	fail_cnt
+ 481               		.comm	fail_cnt,1,1
+ 482               		.local	tx_cnt
+ 483               		.comm	tx_cnt,1,1
+ 484               		.local	tx_in_progress
+ 485               		.comm	tx_in_progress,1,1
+ 486               	.Letext0:
+ 487               		.file 3 "/opt/avr8-gnu-toolchain-linux_x86_64/lib/gcc/avr/4.8.1/include/stddef.h"
+ 488               		.file 4 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/stdint.h"
+ 489               		.file 5 "/opt/uracoli-src-0.4.2/inc/atmega_rfr2.h"
+ 490               		.file 6 "/opt/uracoli-src-0.4.2/inc/transceiver.h"
+ 491               		.file 7 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/stdlib.h"
+ 492               		.file 8 "/opt/uracoli-src-0.4.2/inc/hif.h"
+ 493               		.file 9 "/opt/uracoli-src-0.4.2/inc/ioutil.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 raspbee-secbee.c
+     /tmp/cc73hEFM.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/cc73hEFM.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/cc73hEFM.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/cc73hEFM.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/cc73hEFM.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/cc73hEFM.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/cc73hEFM.s:14     .text.startup:0000000000000000 main
+     /tmp/cc73hEFM.s:481    .bss:0000000000000006 tx_cnt
+     /tmp/cc73hEFM.s:483    .bss:0000000000000007 tx_in_progress
+     /tmp/cc73hEFM.s:475    .bss:0000000000000001 framelen
+     /tmp/cc73hEFM.s:477    .bss:0000000000000003 txfrm
+     /tmp/cc73hEFM.s:292    .text:0000000000000000 __vector_63
+                             .bss:0000000000000000 trac_status.2614
+     /tmp/cc73hEFM.s:479    .bss:0000000000000005 fail_cnt
+
+UNDEFINED SYMBOLS
+trx_io_init
+trx_reg_write
+trx_bit_read
+trx_bit_write
+hif_init
+hif_getc
+malloc
+trx_frame_write
+__do_clear_bss
