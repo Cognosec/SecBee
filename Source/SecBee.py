@@ -11,6 +11,7 @@ import scapy.layers.zigbee
 import threading
 import atexit
 import os
+import serial
 import socket
 import zigbee_transkey
 from subprocess import call
@@ -24,7 +25,7 @@ send_packet = False
 send_acks = False
 acknowledged = []
 #beacon_dot15d4_seqnum = 23
-#active_networkkey = "144221a817f284c7e6e1f000cd80ff0f".decode('hex')
+active_networkkey = "144221a817f284c7e6e1f000cd80ff0f".decode('hex')
 #active_networkkey = "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC".decode('hex')
 i = 0
 
@@ -378,7 +379,7 @@ class MyThread(threading.Thread):
 class Gui:
 
     global source_choices
-        
+
     window = Tk()
     #window.resizable(0, 0)
     x = DoubleVar() # special Tkinter variables. DoubleVar object wraps integers and redraws the gui on change.
@@ -386,7 +387,8 @@ class Gui:
     unit = StringVar()
     source_value = StringVar()
     destination_value = StringVar()
-    
+    raspbee_ip = StringVar()
+    raspbee_ip.set("192.168.1.66")
     destination_choices = []
     source_om = None
     dest_om = None
@@ -419,6 +421,8 @@ class Gui:
     xDeviceBlockOff=0
     yDeviceBlockOff=0
     def __init__(self):
+
+        
 
         self.read_config_file('secbee.conf')
 
@@ -479,8 +483,8 @@ class Gui:
         Label(self.window, text = "Information Gathering").place(x=95+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*11)+self.yoff+self.yCommandsBlockOff)
         Button(self.window, text = "Active Endpoint Request", width = 22, command = self.send_active_endpoint_request).place(x=70+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*12)+self.yoff+self.yCommandsBlockOff)
         Button(self.window, text = "Data Request", width = 22, command = self.send_data_request).place(x=70+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*13)+self.yoff+self.yCommandsBlockOff)
-        Button(self.window, text = "Dummy5", width = 10, command = self.send_data_request).place(x=70+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yCommandsBlockOff)
-        Button(self.window, text = "Dummy6", width = 9, command = self.send_data_request).place(x=200+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yCommandsBlockOff)
+        Button(self.window, text = "Insecure Rejoin", width = 22, command = self.send_rejoin_request).place(x=70+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yCommandsBlockOff)
+        #Button(self.window, text = "Dummy6", width = 9, command = self.send_data_request).place(x=200+self.xoff+self.xCommandsBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yCommandsBlockOff)
 
         self.source_value.trace('w',self.destination_updater)
 
@@ -504,12 +508,12 @@ class Gui:
         Checkbutton(self.window, text="Absolute value", variable=self.zb_zcl_absolute).place(x=1030+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*9)+self.yoff+self.yParametersBlockOff+2)
 #.grid(row=13, column = 8, sticky=W)
         default = IntVar()
-        default.set(0)
+        default.set(1)
         self.frame_counter = Spinbox(self.window, from_=self.framecounter_from, to=self.framecounter_to, textvariable = default)
-        self.zb_nwk_seqnumber = Spinbox(self.window, from_=0, to=255)
-        self.dot15d4_seqnumber = Spinbox(self.window, from_=0, to=255)
-        self.zb_zadp_counter = Spinbox(self.window, from_=0, to=255)
-        self.zb_zcl_trans_seq = Spinbox(self.window, from_=0, to=255)
+        self.zb_nwk_seqnumber = Spinbox(self.window, from_=self.framecounter_from, to=self.framecounter_to, textvariable = default)
+        self.dot15d4_seqnumber = Spinbox(self.window, from_=self.framecounter_from, to=self.framecounter_to, textvariable = default)
+        self.zb_zadp_counter = Spinbox(self.window, from_=self.framecounter_from, to=self.framecounter_to, textvariable = default)
+        self.zb_zcl_trans_seq = Spinbox(self.window, from_=self.framecounter_from, to=self.framecounter_to, textvariable = default)
 
         self.frame_counter.place(x=840+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*1)+self.yoff+self.yParametersBlockOff)
         self.zb_nwk_seqnumber.place(x=840+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*3)+self.yoff+self.yParametersBlockOff)
@@ -523,9 +527,9 @@ class Gui:
         Button(self.window, text = "Send ACKs", width = 14, command = self.send_acks).place(x=840+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*12)+self.yoff+self.yParametersBlockOff)
         Button(self.window, text = "Stop ACKs", width = 14, command = self.stop_acks).place(x=1013+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*12)+self.yoff+self.yParametersBlockOff)
         Button(self.window, text = "Dummy1", width = 14, command = self.send_acks).place(x=840+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*13)+self.yoff+self.yParametersBlockOff)
-        Button(self.window, text = "Dummy2", width = 14, command = self.stop_acks).place(x=1013+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*13)+self.yoff+self.yParametersBlockOff)
-        Button(self.window, text = "Dummy3", width = 14, command = self.send_acks).place(x=840+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yParametersBlockOff)
-        Button(self.window, text = "Dummy4", width = 14, command = self.stop_acks).place(x=1013+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yParametersBlockOff)
+        Label(self.window, text = "Dummy2", width = 14).place(x=1013+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*13)+self.yoff+self.yParametersBlockOff)
+        Label(self.window, text = "RaspBee IP").place(x=840+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yParametersBlockOff)
+        Entry(self.window, width = 14, textvariable = self.raspbee_ip).place(x=1013+self.xoff+self.xParametersBlockOff,y=(self.rowPadding+self.rowOffset*14)+self.yoff+self.yParametersBlockOff)
 
         #########--->Devices List<---#########
 
@@ -612,6 +616,111 @@ class Gui:
         print str(dot15d4.do_build().encode('hex'))
         send(dot15d4)
         return True
+
+    def send_rejoin_request(self):
+        #select device
+        global known_devices
+        global network_keys
+        global active_networkkey
+
+        source = known_devices[int(self.source_value.get().split(" ")[0])]
+        destination = known_devices [int(self.source_value.get().split(" ")[0])].destinations[int(self.destination_value.get().split(" ")[0])]
+
+        #create packet
+        packet = self.create_dot15d4_packet(source, destination)
+
+        zbnwk = ZigbeeNWK()
+
+        zbnwk.discover_route = 0L 
+        zbnwk.proto_version = 2L
+        zbnwk.frametype = 1L
+        zbnwk.flags  =  16L
+        zbnwk.destination   = destination.short_address
+        zbnwk.source = source.short_address
+        zbnwk.radius = 30
+        new_zbnwk_seqnum = (destination.zb_nwk_seqnumber + int(self.zb_nwk_seqnumber.get()))%255
+        if new_zbnwk_seqnum == 0:
+            new_zbnwk_seqnum = 1
+        zbnwk.seqnum = new_zbnwk_seqnum
+        zbnwk.relay_count  = None
+        zbnwk.relay_index  = None
+        zbnwk.relays  = None
+        zbnwk.ext_dst  = None
+        zbnwk.ext_src  = source.ext_address
+
+        zbnwkcmdpl = ZigbeeNWKCommandPayload()
+
+        zbnwkcmdpl.cmd_identifier = 6
+        zbnwkcmdpl.reserved = None
+        zbnwkcmdpl.multicast = None
+        zbnwkcmdpl.dest_addr_bit = None
+        zbnwkcmdpl.many_to_one = None
+        zbnwkcmdpl.reserved = None
+        zbnwkcmdpl.route_request_identified = None
+        zbnwkcmdpl.destination_address = None
+        zbnwkcmdpl.path_cost = None
+        zbnwkcmdpl.ext_dst = None
+        zbnwkcmdpl.reserved = None
+        zbnwkcmdpl.multicast = None
+        zbnwkcmdpl.responder_addr_bit = None
+        zbnwkcmdpl.originator_addr_bit = None
+        zbnwkcmdpl.reserved = None
+        zbnwkcmdpl.route_request_identifier = None
+        zbnwkcmdpl.originator_address = None
+        zbnwkcmdpl.responder_address = None
+        zbnwkcmdpl.path_cost = None
+        zbnwkcmdpl.originator_addr = None
+        zbnwkcmdpl.responder_addr = None
+        zbnwkcmdpl.status_code = None
+        zbnwkcmdpl.destination_address = None
+        zbnwkcmdpl.remove_children = None
+        zbnwkcmdpl.request = None
+        zbnwkcmdpl.rejoin = None
+        zbnwkcmdpl.reserved = None
+        zbnwkcmdpl.rr_relay_count = None
+        zbnwkcmdpl.rr_relay_list = None
+        zbnwkcmdpl.allocate_address = 1L
+        zbnwkcmdpl.security_capability = 0L
+        zbnwkcmdpl.reserved2 = 0L
+        zbnwkcmdpl.reserved1 = 0L
+        zbnwkcmdpl.receiver_on_when_idle = 0L
+        zbnwkcmdpl.power_source = 0L
+        zbnwkcmdpl.device_type = 0L
+        zbnwkcmdpl.alternate_pan_coordinator = 0L
+        zbnwkcmdpl.network_address = 65535
+        zbnwkcmdpl.rejoin_status = 0
+        zbnwkcmdpl.reserved = None
+        zbnwkcmdpl.last_frame = 0
+        zbnwkcmdpl.first_frame = 0
+        zbnwkcmdpl.entry_count = 0
+        zbnwkcmdpl.link_status_list = []
+        zbnwkcmdpl.report_command_identifier = 0
+        zbnwkcmdpl.report_information_count = 0
+        zbnwkcmdpl.epid = 0
+        zbnwkcmdpl.PAN_ID_conflict_report = []
+        zbnwkcmdpl.update_command_identifier = 0
+        zbnwkcmdpl.update_information_count = 0
+        zbnwkcmdpl.epid = 0
+        zbnwkcmdpl.update_id = 0
+        zbnwkcmdpl.new_PAN_ID = 0
+
+        #encrypt and build the packet
+        packet = packet / zbnwk / zbnwkcmdpl 
+
+        print "Packet"
+        print str(packet.do_build()).encode('hex')
+       
+
+        #send packet
+       
+        print "sent message over serial"
+        send(packet)
+        #send(encpacket)
+        print "sent message over serial"
+        
+
+        return True
+
 
     def send_active_endpoint_request(self):
         #select device
@@ -702,6 +811,7 @@ class Gui:
         global scheduled_cmd
         global send_packet
 
+
         source = known_devices[int(self.source_value.get().split(" ")[0])]
         destination = known_devices [int(self.source_value.get().split(" ")[0])].destinations[int(self.destination_value.get().split(" ")[0])]
 
@@ -762,16 +872,22 @@ class Gui:
         encpacket = scapy.killerbee.kbencrypt(packet,dec_payload, active_networkkey, 5)
         print "encpacket"
         print str(encpacket.do_build()).encode('hex')
-
+        '''
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        sock.connect(("192.168.1.10",40000))
-
-        sock.send('x'+chr(len(encpacket))+encpacket.do_build())
-       
+        sock.connect((self.raspbee_ip.get(),40000))
+        print self.raspbee_ip.get()
+        sock.send('secbee'+chr(len(encpacket))+encpacket.do_build())
+        print 'secbee'+chr(len(encpacket))+encpacket.do_build()
         sock.close()
-        
+        '''
+        print "sent message over serial"
+        ser = serial.Serial("/dev/vcom0",38400)
+        x = ser.write('secbee'+chr(len(encpacket))+encpacket.do_build())
+        print ser.readline()
+        ser.close()
         #send(encpacket)
+        print "sent message over serial"
 
         return True
 
@@ -903,16 +1019,14 @@ class Gui:
         print "encpacket"
         print str(encpacket.do_build()).encode('hex')
 
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        sock.connect(("192.168.1.100",40000))
-
-        sock.send('x'+chr(len(encpacket))+encpacket.do_build())
+        print "sent message over serial"
+        ser = serial.Serial("/dev/vcom0",38400)
+        x = ser.write('secbee'+chr(len(encpacket))+encpacket.do_build())
+        print ser.readline()
+        ser.close()
+        #send(encpacket)
+        print "sent message over serial"
         
-        sock.close()
-        
-        
-
         return True
 
     def send_motion(self, cmd):
@@ -1235,9 +1349,12 @@ class Gui:
             pickle.dump(known_devices,open(fileName,"wb"))
         return
     def start_sniffing(self):
-                   
+        
+        os.system("rm /tmp/secbee.pcap")
+        os.system("mkfifo /tmp/secbee.pcap")           
         self.sniff = MyThread()
         self.sniff.start()
+        os.system("wireshark -k -i \"/tmp/secbee.pcap\" &")
 
     def read_config_file(self, config_file_name):
         global active_networkkey
