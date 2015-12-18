@@ -49,3 +49,6 @@ Next steps
 We will work on the code to make it stable and setup an installation script for all required tools.
 We are also looking in implementing new commands for testing.
 
+# FAQ / Known Issues
+
+- To update the device list the current state has to be saved and reloaded. This is known issue and will be fixed.
