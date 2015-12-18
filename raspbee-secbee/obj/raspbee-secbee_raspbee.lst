@@ -8,11 +8,10 @@
    8               		.text
    9               	.Ltext0:
   10               		.cfi_sections	.debug_frame
-  11               		.section	.text.startup,"ax",@progbits
-  12               	.global	main
-  14               	main:
-  15               	.LFB34:
-  16               		.file 1 "raspbee-secbee.c"
+  11               	.global	readchar
+  13               	readchar:
+  14               	.LFB34:
+  15               		.file 1 "raspbee-secbee.c"
    1:raspbee-secbee.c **** #include "board.h"
    2:raspbee-secbee.c **** #include "transceiver.h"
    3:raspbee-secbee.c **** #include "ioutil.h"
@@ -28,40 +27,75 @@
   13:raspbee-secbee.c **** #define TX_FAIL_OFFSET (7)
   14:raspbee-secbee.c **** #define TX_SRAM_OFFSET (1)
   15:raspbee-secbee.c **** 
-  16:raspbee-secbee.c **** int main(void)
+  16:raspbee-secbee.c **** int readchar(void)
   17:raspbee-secbee.c **** {
-  17               		.loc 1 17 0
-  18               		.cfi_startproc
-  19 0000 CF93      		push r28
-  20               	.LCFI0:
-  21               		.cfi_def_cfa_offset 4
-  22               		.cfi_offset 28, -3
-  23 0002 DF93      		push r29
-  24               	.LCFI1:
-  25               		.cfi_def_cfa_offset 5
-  26               		.cfi_offset 29, -4
-  27 0004 CDB7      		in r28,__SP_L__
-  28 0006 DEB7      		in r29,__SP_H__
-  29               	.LCFI2:
-  30               		.cfi_def_cfa_register 28
-  31 0008 CF5F      		subi r28,-1
-  32 000a D109      		sbc r29,__zero_reg__
-  33               	.LCFI3:
-  34               		.cfi_def_cfa_offset 260
-  35 000c 0FB6      		in __tmp_reg__,__SREG__
-  36 000e F894      		cli
-  37 0010 DEBF      		out __SP_H__,r29
-  38 0012 0FBE      		out __SREG__,__tmp_reg__
-  39 0014 CDBF      		out __SP_L__,r28
-  40               	/* prologue: function */
-  41               	/* frame size = 255 */
-  42               	/* stack size = 257 */
-  43               	.L__stack_usage = 257
-  44               	.LVL0:
-  45               	.LBB15:
-  46               	.LBB16:
-  47               	.LBB17:
-  48               		.file 2 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h"
+  16               		.loc 1 17 0
+  17               		.cfi_startproc
+  18               	/* prologue: function */
+  19               	/* frame size = 0 */
+  20               	/* stack size = 0 */
+  21               	.L__stack_usage = 0
+  22               	.L3:
+  18:raspbee-secbee.c ****    int inchar;
+  19:raspbee-secbee.c ****    do
+  20:raspbee-secbee.c ****    {
+  21:raspbee-secbee.c ****       inchar = hif_getc();
+  23               		.loc 1 21 0 discriminator 1
+  24 0000 0E94 0000 		call hif_getc
+  25               	.LVL0:
+  22:raspbee-secbee.c ****    }
+  23:raspbee-secbee.c ****    while (EOF == inchar);
+  26               		.loc 1 23 0 discriminator 1
+  27 0004 8F3F      		cpi r24,-1
+  28 0006 2FEF      		ldi r18,-1
+  29 0008 9207      		cpc r25,r18
+  30 000a 01F0      		breq .L3
+  31               	/* epilogue start */
+  24:raspbee-secbee.c ****    return inchar;
+  25:raspbee-secbee.c **** }
+  32               		.loc 1 25 0
+  33 000c 0895      		ret
+  34               		.cfi_endproc
+  35               	.LFE34:
+  37               		.section	.text.startup,"ax",@progbits
+  38               	.global	main
+  40               	main:
+  41               	.LFB35:
+  26:raspbee-secbee.c **** 
+  27:raspbee-secbee.c **** int main(void)
+  28:raspbee-secbee.c **** {
+  42               		.loc 1 28 0
+  43               		.cfi_startproc
+  44 0000 CF93      		push r28
+  45               	.LCFI0:
+  46               		.cfi_def_cfa_offset 4
+  47               		.cfi_offset 28, -3
+  48 0002 DF93      		push r29
+  49               	.LCFI1:
+  50               		.cfi_def_cfa_offset 5
+  51               		.cfi_offset 29, -4
+  52 0004 CDB7      		in r28,__SP_L__
+  53 0006 DEB7      		in r29,__SP_H__
+  54               	.LCFI2:
+  55               		.cfi_def_cfa_register 28
+  56 0008 CF5F      		subi r28,-1
+  57 000a D109      		sbc r29,__zero_reg__
+  58               	.LCFI3:
+  59               		.cfi_def_cfa_offset 260
+  60 000c 0FB6      		in __tmp_reg__,__SREG__
+  61 000e F894      		cli
+  62 0010 DEBF      		out __SP_H__,r29
+  63 0012 0FBE      		out __SREG__,__tmp_reg__
+  64 0014 CDBF      		out __SP_L__,r28
+  65               	/* prologue: function */
+  66               	/* frame size = 255 */
+  67               	/* stack size = 257 */
+  68               	.L__stack_usage = 257
+  69               	.LVL1:
+  70               	.LBB18:
+  71               	.LBB19:
+  72               	.LBB20:
+  73               		.file 2 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h"
    1:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
    2:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
    3:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
@@ -225,628 +259,833 @@
  161:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	#endif
  162:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 
  163:/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/util/delay.h **** 	__builtin_avr_delay_cycles(__ticks_dc);
-  49               		.loc 2 163 0
-  50 0016 8FE1      		ldi r24,lo8(19999)
-  51 0018 9EE4      		ldi r25,hi8(19999)
-  52 001a 0197      		1: sbiw r24,1
-  53 001c 01F4      		brne 1b
-  54 001e 00C0      		rjmp .
-  55 0020 0000      		nop
-  56               	.LBE17:
-  57               	.LBE16:
-  58               	.LBE15:
-  18:raspbee-secbee.c ****     uint32_t panid = 0x35b6; //panid of the network
-  19:raspbee-secbee.c ****     uint32_t shortaddr = 0x0000; //shortaddr of the hub
-  20:raspbee-secbee.c ****     int channel = 20; //channel for the network
-  21:raspbee-secbee.c **** 
-  22:raspbee-secbee.c ****     int inchar;
-  23:raspbee-secbee.c ****     const uint32_t br = HIF_DEFAULT_BAUDRATE;
-  24:raspbee-secbee.c ****     trx_regval_t rval;
-  25:raspbee-secbee.c **** 
-  26:raspbee-secbee.c ****     /* This will stop the application before initializing the radio transceiver
-  27:raspbee-secbee.c ****      * (ISP issue with MISO pin, see FAQ)
-  28:raspbee-secbee.c ****      */
-  29:raspbee-secbee.c ****     trap_if_key_pressed();
-  30:raspbee-secbee.c **** 
-  31:raspbee-secbee.c ****     /* Step 0: init MCU peripherals */
-  32:raspbee-secbee.c ****     LED_INIT();
-  59               		.loc 1 32 0
-  60 0022 579A      		sbi 0xa,7
-  61 0024 9A9A      		sbi 0x13,2
-  62 0026 5F9A      		sbi 0xb,7
-  63 0028 A29A      		sbi 0x14,2
-  33:raspbee-secbee.c ****     trx_io_init(SPI_RATE_1_2);
-  64               		.loc 1 33 0
-  65 002a 84E0      		ldi r24,lo8(4)
-  66 002c 0E94 0000 		call trx_io_init
-  67               	.LVL1:
-  34:raspbee-secbee.c ****     LED_SET_VALUE(LED_MAX_VALUE);
-  68               		.loc 1 34 0
-  69 0030 5F98      		cbi 0xb,7
-  70 0032 A298      		cbi 0x14,2
-  35:raspbee-secbee.c ****     LED_SET_VALUE(0);
-  71               		.loc 1 35 0
-  72 0034 5F9A      		sbi 0xb,7
-  73 0036 A29A      		sbi 0x14,2
+  74               		.loc 2 163 0
+  75 0016 8FE1      		ldi r24,lo8(19999)
+  76 0018 9EE4      		ldi r25,hi8(19999)
+  77 001a 0197      		1: sbiw r24,1
+  78 001c 01F4      		brne 1b
+  79 001e 00C0      		rjmp .
+  80 0020 0000      		nop
+  81               	.LBE20:
+  82               	.LBE19:
+  83               	.LBE18:
+  29:raspbee-secbee.c ****     uint32_t panid = 0x35b6; //panid of the network
+  30:raspbee-secbee.c ****     uint32_t shortaddr = 0x0000; //shortaddr of the hub
+  31:raspbee-secbee.c ****     int channel = 20; //channel for the network
+  32:raspbee-secbee.c **** 
+  33:raspbee-secbee.c ****     int inchar;
+  34:raspbee-secbee.c ****     const uint32_t br = HIF_DEFAULT_BAUDRATE;
+  35:raspbee-secbee.c ****     trx_regval_t rval;
   36:raspbee-secbee.c **** 
-  37:raspbee-secbee.c ****     /* Step 1: initialize the transceiver */
-  38:raspbee-secbee.c ****     TRX_RESET_LOW();
-  74               		.loc 1 38 0
-  75 0038 8091 3901 		lds r24,313
-  76 003c 8E7F      		andi r24,lo8(-2)
-  77 003e 8093 3901 		sts 313,r24
-  39:raspbee-secbee.c ****     TRX_SLPTR_LOW();
-  78               		.loc 1 39 0
-  79 0042 8091 3901 		lds r24,313
-  80 0046 8D7F      		andi r24,lo8(-3)
-  81 0048 8093 3901 		sts 313,r24
-  82               	.LVL2:
-  83               	.LBB18:
-  84               	.LBB19:
-  85               		.loc 2 163 0
-  86 004c 90E1      		ldi r25,lo8(16)
-  87 004e 9A95      		1: dec r25
-  88 0050 01F4      		brne 1b
-  89               	.LBE19:
-  90               	.LBE18:
-  40:raspbee-secbee.c ****     DELAY_US(TRX_RESET_TIME_US);
-  41:raspbee-secbee.c ****     TRX_RESET_HIGH();
-  91               		.loc 1 41 0
-  92 0052 8091 3901 		lds r24,313
-  93 0056 8160      		ori r24,lo8(1)
-  94 0058 8093 3901 		sts 313,r24
-  42:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_TRX_OFF);
-  95               		.loc 1 42 0
-  96 005c 68E0      		ldi r22,lo8(8)
-  97 005e 82E0      		ldi r24,lo8(2)
-  98 0060 0E94 0000 		call trx_reg_write
-  99               	.LVL3:
- 100               	.LBB20:
- 101               	.LBB21:
- 102               		.loc 2 163 0
- 103 0064 EFE7      		ldi r30,lo8(815999)
- 104 0066 F3E7      		ldi r31,hi8(815999)
- 105 0068 2CE0      		ldi r18,hlo8(815999)
- 106 006a E150      		1: subi r30,1
- 107 006c F040      		sbci r31,0
- 108 006e 2040      		sbci r18,0
- 109 0070 01F4      		brne 1b
- 110 0072 00C0      		rjmp .
- 111 0074 0000      		nop
- 112               	.LBE21:
- 113               	.LBE20:
-  43:raspbee-secbee.c ****     DELAY_MS(TRX_INIT_TIME_US);
-  44:raspbee-secbee.c ****     rval = trx_bit_read(SR_TRX_STATUS);
- 114               		.loc 1 44 0
- 115 0076 40E0      		ldi r20,0
- 116 0078 6FE1      		ldi r22,lo8(31)
- 117 007a 81E0      		ldi r24,lo8(1)
- 118 007c 0E94 0000 		call trx_bit_read
- 119               	.LVL4:
-  45:raspbee-secbee.c ****     ERR_CHECK(TRX_OFF!=rval);
- 120               		.loc 1 45 0
- 121 0080 8830      		cpi r24,lo8(8)
- 122 0082 01F0      		breq .+2
- 123 0084 00C0      		rjmp .L3
-  46:raspbee-secbee.c ****     LED_SET_VALUE(1);
- 124               		.loc 1 46 0 discriminator 1
- 125 0086 5F98      		cbi 0xb,7
- 126 0088 A29A      		sbi 0x14,2
+  37:raspbee-secbee.c ****     /* This will stop the application before initializing the radio transceiver
+  38:raspbee-secbee.c ****      * (ISP issue with MISO pin, see FAQ)
+  39:raspbee-secbee.c ****      */
+  40:raspbee-secbee.c ****     trap_if_key_pressed();
+  41:raspbee-secbee.c **** 
+  42:raspbee-secbee.c ****     /* Step 0: init MCU peripherals */
+  43:raspbee-secbee.c ****     LED_INIT();
+  84               		.loc 1 43 0
+  85 0022 579A      		sbi 0xa,7
+  86 0024 9A9A      		sbi 0x13,2
+  87 0026 5F9A      		sbi 0xb,7
+  88 0028 A29A      		sbi 0x14,2
+  44:raspbee-secbee.c ****     trx_io_init(SPI_RATE_1_2);
+  89               		.loc 1 44 0
+  90 002a 84E0      		ldi r24,lo8(4)
+  91 002c 0E94 0000 		call trx_io_init
+  92               	.LVL2:
+  45:raspbee-secbee.c ****     //LED_SET_VALUE(LED_MAX_VALUE);
+  46:raspbee-secbee.c ****     //LED_SET_VALUE(0);
   47:raspbee-secbee.c **** 
-  48:raspbee-secbee.c ****     /* Step 2: setup transmitter
-  49:raspbee-secbee.c ****      * - configure radio channel
-  50:raspbee-secbee.c ****      * - enable transmitters automatic crc16 generation
-  51:raspbee-secbee.c ****      * - go into RX state,
-  52:raspbee-secbee.c ****      * - enable "transmit end" IRQ
-  53:raspbee-secbee.c ****      */
-  54:raspbee-secbee.c ****     trx_bit_write(SR_CHANNEL,channel);
- 127               		.loc 1 54 0 discriminator 1
- 128 008a 24E1      		ldi r18,lo8(20)
- 129 008c 40E0      		ldi r20,0
- 130 008e 6FE1      		ldi r22,lo8(31)
- 131 0090 0E94 0000 		call trx_bit_write
- 132               	.LVL5:
-  55:raspbee-secbee.c ****     trx_bit_write(SR_TX_AUTO_CRC_ON,1); //with crc
- 133               		.loc 1 55 0 discriminator 1
- 134 0094 21E0      		ldi r18,lo8(1)
- 135 0096 45E0      		ldi r20,lo8(5)
- 136 0098 60E2      		ldi r22,lo8(32)
- 137 009a 84E0      		ldi r24,lo8(4)
- 138 009c 0E94 0000 		call trx_bit_write
- 139               	.LVL6:
-  56:raspbee-secbee.c **** 
-  57:raspbee-secbee.c ****     /* for sending acks */
-  58:raspbee-secbee.c ****     trx_reg_write(RG_PAN_ID_0,(panid&0xff));
- 140               		.loc 1 58 0 discriminator 1
- 141 00a0 66EB      		ldi r22,lo8(-74)
- 142 00a2 82E2      		ldi r24,lo8(34)
- 143 00a4 0E94 0000 		call trx_reg_write
- 144               	.LVL7:
-  59:raspbee-secbee.c ****     trx_reg_write(RG_PAN_ID_1,(panid>>8));
- 145               		.loc 1 59 0 discriminator 1
- 146 00a8 65E3      		ldi r22,lo8(53)
- 147 00aa 83E2      		ldi r24,lo8(35)
- 148 00ac 0E94 0000 		call trx_reg_write
- 149               	.LVL8:
-  60:raspbee-secbee.c **** 
-  61:raspbee-secbee.c ****     trx_reg_write(RG_SHORT_ADDR_0,(shortaddr&0xff));
- 150               		.loc 1 61 0 discriminator 1
- 151 00b0 60E0      		ldi r22,0
- 152 00b2 80E2      		ldi r24,lo8(32)
- 153 00b4 0E94 0000 		call trx_reg_write
- 154               	.LVL9:
-  62:raspbee-secbee.c ****     trx_reg_write(RG_SHORT_ADDR_1,(shortaddr>>8));
- 155               		.loc 1 62 0 discriminator 1
- 156 00b8 60E0      		ldi r22,0
- 157 00ba 81E2      		ldi r24,lo8(33)
- 158 00bc 0E94 0000 		call trx_reg_write
- 159               	.LVL10:
-  63:raspbee-secbee.c **** 
-  64:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_RX_AACK_ON);
- 160               		.loc 1 64 0 discriminator 1
- 161 00c0 66E1      		ldi r22,lo8(22)
- 162 00c2 82E0      		ldi r24,lo8(2)
- 163 00c4 0E94 0000 		call trx_reg_write
- 164               	.LVL11:
-  65:raspbee-secbee.c ****     //trx_bit_write(SR_AACK_ACK_TIME,1); //respond with ack after 2 instead of 16 syms
-  66:raspbee-secbee.c **** 
-  67:raspbee-secbee.c **** #if defined(TRX_IRQ_TRX_END)
-  68:raspbee-secbee.c ****     trx_reg_write(RG_IRQ_MASK,TRX_IRQ_TRX_END);
-  69:raspbee-secbee.c **** #elif defined(TRX_IRQ_TX_END)
-  70:raspbee-secbee.c ****     trx_reg_write(RG_IRQ_MASK,TRX_IRQ_TX_END);
- 165               		.loc 1 70 0 discriminator 1
- 166 00c8 60E4      		ldi r22,lo8(64)
- 167 00ca 8EE0      		ldi r24,lo8(14)
- 168 00cc 0E94 0000 		call trx_reg_write
- 169               	.LVL12:
-  71:raspbee-secbee.c **** #else
-  72:raspbee-secbee.c **** #  error "Unknown IRQ bits"
-  73:raspbee-secbee.c **** #endif
-  74:raspbee-secbee.c ****     sei();
- 170               		.loc 1 74 0 discriminator 1
- 171               	/* #APP */
- 172               	 ;  74 "raspbee-secbee.c" 1
- 173 00d0 7894      		sei
- 174               	 ;  0 "" 2
-  75:raspbee-secbee.c ****     LED_SET_VALUE(2);
- 175               		.loc 1 75 0 discriminator 1
- 176               	/* #NOAPP */
- 177 00d2 5F9A      		sbi 0xb,7
- 178 00d4 A298      		cbi 0x14,2
-  76:raspbee-secbee.c **** 
-  77:raspbee-secbee.c ****     /* setting up UART and adjusting the baudrate */
-  78:raspbee-secbee.c ****     hif_init(br);
- 179               		.loc 1 78 0 discriminator 1
- 180 00d6 60E0      		ldi r22,0
- 181 00d8 76E9      		ldi r23,lo8(-106)
- 182 00da 80E0      		ldi r24,0
- 183 00dc 90E0      		ldi r25,0
- 184 00de 0E94 0000 		call hif_init
+  48:raspbee-secbee.c ****     /* Step 1: initialize the transceiver */
+  49:raspbee-secbee.c ****     TRX_RESET_LOW();
+  93               		.loc 1 49 0
+  94 0030 8091 3901 		lds r24,313
+  95 0034 8E7F      		andi r24,lo8(-2)
+  96 0036 8093 3901 		sts 313,r24
+  50:raspbee-secbee.c ****     TRX_SLPTR_LOW();
+  97               		.loc 1 50 0
+  98 003a 8091 3901 		lds r24,313
+  99 003e 8D7F      		andi r24,lo8(-3)
+ 100 0040 8093 3901 		sts 313,r24
+ 101               	.LVL3:
+ 102               	.LBB21:
+ 103               	.LBB22:
+ 104               		.loc 2 163 0
+ 105 0044 90E1      		ldi r25,lo8(16)
+ 106 0046 9A95      		1: dec r25
+ 107 0048 01F4      		brne 1b
+ 108               	.LBE22:
+ 109               	.LBE21:
+  51:raspbee-secbee.c ****     DELAY_US(TRX_RESET_TIME_US);
+  52:raspbee-secbee.c ****     TRX_RESET_HIGH();
+ 110               		.loc 1 52 0
+ 111 004a 8091 3901 		lds r24,313
+ 112 004e 8160      		ori r24,lo8(1)
+ 113 0050 8093 3901 		sts 313,r24
+  53:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_TRX_OFF);
+ 114               		.loc 1 53 0
+ 115 0054 68E0      		ldi r22,lo8(8)
+ 116 0056 82E0      		ldi r24,lo8(2)
+ 117 0058 0E94 0000 		call trx_reg_write
+ 118               	.LVL4:
+ 119               	.LBB23:
+ 120               	.LBB24:
+ 121               		.loc 2 163 0
+ 122 005c EFE7      		ldi r30,lo8(815999)
+ 123 005e F3E7      		ldi r31,hi8(815999)
+ 124 0060 2CE0      		ldi r18,hlo8(815999)
+ 125 0062 E150      		1: subi r30,1
+ 126 0064 F040      		sbci r31,0
+ 127 0066 2040      		sbci r18,0
+ 128 0068 01F4      		brne 1b
+ 129 006a 00C0      		rjmp .
+ 130 006c 0000      		nop
+ 131               	.LBE24:
+ 132               	.LBE23:
+  54:raspbee-secbee.c ****     DELAY_MS(TRX_INIT_TIME_US);
+  55:raspbee-secbee.c ****     rval = trx_bit_read(SR_TRX_STATUS);
+ 133               		.loc 1 55 0
+ 134 006e 40E0      		ldi r20,0
+ 135 0070 6FE1      		ldi r22,lo8(31)
+ 136 0072 81E0      		ldi r24,lo8(1)
+ 137 0074 0E94 0000 		call trx_bit_read
+ 138               	.LVL5:
+  56:raspbee-secbee.c ****     ERR_CHECK(TRX_OFF!=rval);
+ 139               		.loc 1 56 0
+ 140 0078 8830      		cpi r24,lo8(8)
+ 141 007a 01F0      		breq .+2
+ 142 007c 00C0      		rjmp .L7
+  57:raspbee-secbee.c ****     //LED_SET_VALUE(1);
+  58:raspbee-secbee.c **** 
+  59:raspbee-secbee.c ****     /* Step 2: setup transmitter
+  60:raspbee-secbee.c ****      * - configure radio channel
+  61:raspbee-secbee.c ****      * - enable transmitters automatic crc16 generation
+  62:raspbee-secbee.c ****      * - go into RX state,
+  63:raspbee-secbee.c ****      * - enable "transmit end" IRQ
+  64:raspbee-secbee.c ****      */
+  65:raspbee-secbee.c ****     trx_bit_write(SR_CHANNEL,channel);
+ 143               		.loc 1 65 0
+ 144 007e 24E1      		ldi r18,lo8(20)
+ 145 0080 40E0      		ldi r20,0
+ 146 0082 6FE1      		ldi r22,lo8(31)
+ 147 0084 0E94 0000 		call trx_bit_write
+ 148               	.LVL6:
+  66:raspbee-secbee.c ****     trx_bit_write(SR_TX_AUTO_CRC_ON,1); //with crc
+ 149               		.loc 1 66 0
+ 150 0088 21E0      		ldi r18,lo8(1)
+ 151 008a 45E0      		ldi r20,lo8(5)
+ 152 008c 60E2      		ldi r22,lo8(32)
+ 153 008e 84E0      		ldi r24,lo8(4)
+ 154 0090 0E94 0000 		call trx_bit_write
+ 155               	.LVL7:
+  67:raspbee-secbee.c **** 
+  68:raspbee-secbee.c ****     /* for sending acks */
+  69:raspbee-secbee.c ****     trx_reg_write(RG_PAN_ID_0,(panid&0xff));
+ 156               		.loc 1 69 0
+ 157 0094 66EB      		ldi r22,lo8(-74)
+ 158 0096 82E2      		ldi r24,lo8(34)
+ 159 0098 0E94 0000 		call trx_reg_write
+ 160               	.LVL8:
+  70:raspbee-secbee.c ****     trx_reg_write(RG_PAN_ID_1,(panid>>8));
+ 161               		.loc 1 70 0
+ 162 009c 65E3      		ldi r22,lo8(53)
+ 163 009e 83E2      		ldi r24,lo8(35)
+ 164 00a0 0E94 0000 		call trx_reg_write
+ 165               	.LVL9:
+  71:raspbee-secbee.c **** 
+  72:raspbee-secbee.c ****     trx_reg_write(RG_SHORT_ADDR_0,(shortaddr&0xff));
+ 166               		.loc 1 72 0
+ 167 00a4 60E0      		ldi r22,0
+ 168 00a6 80E2      		ldi r24,lo8(32)
+ 169 00a8 0E94 0000 		call trx_reg_write
+ 170               	.LVL10:
+  73:raspbee-secbee.c ****     trx_reg_write(RG_SHORT_ADDR_1,(shortaddr>>8));
+ 171               		.loc 1 73 0
+ 172 00ac 60E0      		ldi r22,0
+ 173 00ae 81E2      		ldi r24,lo8(33)
+ 174 00b0 0E94 0000 		call trx_reg_write
+ 175               	.LVL11:
+  74:raspbee-secbee.c **** 
+  75:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_RX_AACK_ON);
+ 176               		.loc 1 75 0
+ 177 00b4 66E1      		ldi r22,lo8(22)
+ 178 00b6 82E0      		ldi r24,lo8(2)
+ 179 00b8 0E94 0000 		call trx_reg_write
+ 180               	.LVL12:
+  76:raspbee-secbee.c ****     //trx_bit_write(SR_AACK_ACK_TIME,1); //respond with ack after 2 instead of 16 syms
+  77:raspbee-secbee.c **** 
+  78:raspbee-secbee.c **** #if defined(TRX_IRQ_TRX_END)
+  79:raspbee-secbee.c ****     trx_reg_write(RG_IRQ_MASK,TRX_IRQ_TRX_END);
+  80:raspbee-secbee.c **** #elif defined(TRX_IRQ_TX_END)
+  81:raspbee-secbee.c ****     trx_reg_write(RG_IRQ_MASK,TRX_IRQ_TX_END);
+ 181               		.loc 1 81 0
+ 182 00bc 60E4      		ldi r22,lo8(64)
+ 183 00be 8EE0      		ldi r24,lo8(14)
+ 184 00c0 0E94 0000 		call trx_reg_write
  185               	.LVL13:
-  79:raspbee-secbee.c **** 
-  80:raspbee-secbee.c ****     /* Step 3: wait for ans send frame (indirect data transfer) */
-  81:raspbee-secbee.c ****     tx_cnt = 0;
- 186               		.loc 1 81 0 discriminator 1
- 187 00e2 1092 0000 		sts tx_cnt,__zero_reg__
-  82:raspbee-secbee.c ****     tx_in_progress = false;
- 188               		.loc 1 82 0 discriminator 1
- 189 00e6 1092 0000 		sts tx_in_progress,__zero_reg__
-  83:raspbee-secbee.c ****     LED_SET_VALUE(0);
- 190               		.loc 1 83 0 discriminator 1
- 191 00ea 5F9A      		sbi 0xb,7
- 192 00ec A29A      		sbi 0x14,2
- 193 00ee 8E01      		movw r16,r28
- 194 00f0 0F5F      		subi r16,-1
- 195 00f2 1F4F      		sbci r17,-1
- 196               	.L4:
-  84:raspbee-secbee.c **** 
-  85:raspbee-secbee.c ****     uint8_t line[255];
-  86:raspbee-secbee.c ****     bool received;
+  82:raspbee-secbee.c **** #else
+  83:raspbee-secbee.c **** #  error "Unknown IRQ bits"
+  84:raspbee-secbee.c **** #endif
+  85:raspbee-secbee.c ****     sei();
+ 186               		.loc 1 85 0
+ 187               	/* #APP */
+ 188               	 ;  85 "raspbee-secbee.c" 1
+ 189 00c4 7894      		sei
+ 190               	 ;  0 "" 2
+  86:raspbee-secbee.c ****     //LED_SET_VALUE(2);
   87:raspbee-secbee.c **** 
-  88:raspbee-secbee.c ****     while(1)
-  89:raspbee-secbee.c ****     {
-  90:raspbee-secbee.c ****         received = false;
-  91:raspbee-secbee.c ****         while(received==false)
-  92:raspbee-secbee.c ****         {
-  93:raspbee-secbee.c ****             inchar = hif_getc();
- 197               		.loc 1 93 0 discriminator 1
- 198 00f4 0E94 0000 		call hif_getc
- 199               	.LVL14:
-  94:raspbee-secbee.c ****             if (EOF != inchar)
-  95:raspbee-secbee.c ****             {
-  96:raspbee-secbee.c ****                 if (inchar =='x')
- 200               		.loc 1 96 0 discriminator 1
- 201 00f8 8837      		cpi r24,120
- 202 00fa 9105      		cpc r25,__zero_reg__
- 203 00fc 01F4      		brne .L4
- 204               	.L16:
- 205               	.LBB22:
-  97:raspbee-secbee.c ****                 {
-  98:raspbee-secbee.c ****                     do
-  99:raspbee-secbee.c ****                     {
- 100:raspbee-secbee.c ****                         inchar = hif_getc();
- 206               		.loc 1 100 0
- 207 00fe 0E94 0000 		call hif_getc
- 208               	.LVL15:
- 101:raspbee-secbee.c ****                     }
- 102:raspbee-secbee.c ****                     while (EOF == inchar);
- 209               		.loc 1 102 0
- 210 0102 8F3F      		cpi r24,-1
- 211 0104 EFEF      		ldi r30,-1
- 212 0106 9E07      		cpc r25,r30
- 213 0108 01F0      		breq .L16
- 103:raspbee-secbee.c **** 
- 104:raspbee-secbee.c ****                     framelen = inchar;
- 214               		.loc 1 104 0
- 215 010a 9093 0000 		sts framelen+1,r25
- 216 010e 8093 0000 		sts framelen,r24
- 217               	.LVL16:
- 105:raspbee-secbee.c ****                     //PRINTF("Receiving frame from serial, len: %d\n\r", framelen);
- 106:raspbee-secbee.c ****                     int j;
- 107:raspbee-secbee.c ****                     for(j=0;j<framelen;j++)
- 218               		.loc 1 107 0
- 219 0112 7801      		movw r14,r16
- 220               	.LVL17:
- 221               	.L7:
- 222               		.loc 1 107 0 is_stmt 0 discriminator 1
- 223 0114 8091 0000 		lds r24,framelen
- 224 0118 9091 0000 		lds r25,framelen+1
- 225               	.LVL18:
- 226 011c 9701      		movw r18,r14
- 227 011e 201B      		sub r18,r16
- 228 0120 310B      		sbc r19,r17
- 229 0122 2817      		cp r18,r24
- 230 0124 3907      		cpc r19,r25
- 231 0126 04F4      		brge .L19
- 232               	.L9:
- 108:raspbee-secbee.c ****                     {
- 109:raspbee-secbee.c ****                         do
- 110:raspbee-secbee.c ****                         {
- 111:raspbee-secbee.c ****                             inchar = hif_getc();
- 233               		.loc 1 111 0 is_stmt 1
- 234 0128 0E94 0000 		call hif_getc
- 235               	.LVL19:
- 112:raspbee-secbee.c ****                         }
- 113:raspbee-secbee.c ****                         while (EOF == inchar);
- 236               		.loc 1 113 0
- 237 012c 8F3F      		cpi r24,-1
- 238 012e FFEF      		ldi r31,-1
- 239 0130 9F07      		cpc r25,r31
- 240 0132 01F0      		breq .L9
- 114:raspbee-secbee.c **** 
- 115:raspbee-secbee.c ****                         line[j] = inchar;
- 241               		.loc 1 115 0
- 242 0134 F701      		movw r30,r14
- 243 0136 8193      		st Z+,r24
- 244 0138 7F01      		movw r14,r30
- 245               	.LVL20:
- 246 013a 00C0      		rjmp .L7
- 247               	.LVL21:
- 248               	.L19:
+  88:raspbee-secbee.c ****     /* setting up UART and adjusting the baudrate */
+  89:raspbee-secbee.c ****     hif_init(br);
+ 191               		.loc 1 89 0
+ 192               	/* #NOAPP */
+ 193 00c6 60E0      		ldi r22,0
+ 194 00c8 76E9      		ldi r23,lo8(-106)
+ 195 00ca 80E0      		ldi r24,0
+ 196 00cc 90E0      		ldi r25,0
+ 197 00ce 0E94 0000 		call hif_init
+ 198               	.LVL14:
+  90:raspbee-secbee.c **** 
+  91:raspbee-secbee.c ****     /* Step 3: wait for ans send frame (indirect data transfer) */
+  92:raspbee-secbee.c ****     tx_cnt = 0;
+ 199               		.loc 1 92 0
+ 200 00d2 1092 0000 		sts tx_cnt,__zero_reg__
+  93:raspbee-secbee.c ****     tx_in_progress = false;
+ 201               		.loc 1 93 0
+ 202 00d6 1092 0000 		sts tx_in_progress,__zero_reg__
+ 203 00da 8E01      		movw r16,r28
+ 204 00dc 0F5F      		subi r16,-1
+ 205 00de 1F4F      		sbci r17,-1
+ 206               	.LBB25:
+  94:raspbee-secbee.c ****     //LED_SET_VALUE(0);
+  95:raspbee-secbee.c **** 
+  96:raspbee-secbee.c ****     uint8_t line[255];
+  97:raspbee-secbee.c ****     bool received;
+  98:raspbee-secbee.c **** 
+  99:raspbee-secbee.c ****     while(1)
+ 100:raspbee-secbee.c ****     {
+ 101:raspbee-secbee.c ****         received = false;
+ 102:raspbee-secbee.c ****         while(received==false)
+ 103:raspbee-secbee.c ****         {
+ 104:raspbee-secbee.c ****             inchar = hif_getc();
+ 105:raspbee-secbee.c ****             if (EOF != inchar)
+ 106:raspbee-secbee.c ****             {
+ 107:raspbee-secbee.c ****                 if ((inchar =='s') && (readchar() == 'e') && (readchar() == 'c') && (readchar() == 
+ 108:raspbee-secbee.c ****                 {
+ 109:raspbee-secbee.c ****                     framelen = readchar();
+ 110:raspbee-secbee.c ****                     //PRINTF("Receiving frame from serial, len: %d\n\r", framelen);
+ 111:raspbee-secbee.c **** 
+ 112:raspbee-secbee.c ****                     int j;
+ 113:raspbee-secbee.c ****                     for(j=0;j<framelen;j++)
+ 114:raspbee-secbee.c ****                     {
+ 115:raspbee-secbee.c ****                         line[j] = readchar();
  116:raspbee-secbee.c ****                     }
  117:raspbee-secbee.c **** 
- 118:raspbee-secbee.c ****                     //PRINTF("Frame as string: %s\n\r", line);
- 119:raspbee-secbee.c ****                     received = true;
- 120:raspbee-secbee.c **** 
- 121:raspbee-secbee.c ****                     trx_bit_write(SR_AACK_SET_PD,1);
- 249               		.loc 1 121 0
- 250 013c 21E0      		ldi r18,lo8(1)
- 251 013e 45E0      		ldi r20,lo8(5)
- 252 0140 60E2      		ldi r22,lo8(32)
- 253 0142 8EE2      		ldi r24,lo8(46)
- 254 0144 0E94 0000 		call trx_bit_write
- 255               	.LVL22:
+ 118:raspbee-secbee.c ****                     //PRINT("Raspbee: Command queued for sending... \n\r");
+ 119:raspbee-secbee.c ****                     //PRINTF("Frame as string: %s\n\r", line);
+ 120:raspbee-secbee.c ****                     //LED_SET(0);
+ 121:raspbee-secbee.c ****                     received = true;
  122:raspbee-secbee.c **** 
- 123:raspbee-secbee.c ****                     int i;
- 124:raspbee-secbee.c ****                     txfrm = malloc(framelen*sizeof(uint8_t));
- 256               		.loc 1 124 0
- 257 0148 E090 0000 		lds r14,framelen
- 258 014c F090 0000 		lds r15,framelen+1
- 259               	.LVL23:
- 260 0150 C701      		movw r24,r14
- 261 0152 0E94 0000 		call malloc
- 262               	.LVL24:
- 263 0156 8093 0000 		sts txfrm,r24
- 264 015a 9093 0000 		sts txfrm+1,r25
- 265               	.LVL25:
- 266 015e FC01      		movw r30,r24
- 125:raspbee-secbee.c ****                     for(i=0;i<framelen;i++)
- 267               		.loc 1 125 0
- 268 0160 D801      		movw r26,r16
- 269               	.LVL26:
- 270               	.L11:
- 271 0162 CD01      		movw r24,r26
- 272 0164 801B      		sub r24,r16
- 273 0166 910B      		sbc r25,r17
- 274               		.loc 1 125 0 is_stmt 0 discriminator 1
- 275 0168 8E15      		cp r24,r14
- 276 016a 9F05      		cpc r25,r15
- 277 016c 04F4      		brge .L4
- 126:raspbee-secbee.c ****                     txfrm[i] = line[i];
- 278               		.loc 1 126 0 is_stmt 1 discriminator 2
- 279 016e 8D91      		ld r24,X+
- 280 0170 8193      		st Z+,r24
- 281 0172 00C0      		rjmp .L11
- 282               	.LVL27:
- 283               	.L3:
- 284 0174 00C0      		rjmp .L3
- 285               	.LBE22:
- 286               		.cfi_endproc
- 287               	.LFE34:
- 289               		.text
- 290               	.global	__vector_63
- 292               	__vector_63:
- 293               	.LFB35:
- 127:raspbee-secbee.c ****                 }
- 128:raspbee-secbee.c ****             }
- 129:raspbee-secbee.c ****         }
- 130:raspbee-secbee.c **** 
- 131:raspbee-secbee.c ****     }
- 132:raspbee-secbee.c **** }
- 133:raspbee-secbee.c **** 
- 134:raspbee-secbee.c **** #if defined(TRX_IF_RFA1)
- 135:raspbee-secbee.c **** ISR(TRX24_TX_END_vect)
- 136:raspbee-secbee.c **** {
- 294               		.loc 1 136 0
- 295               		.cfi_startproc
- 296 0000 1F92      		push r1
- 297               	.LCFI4:
- 298               		.cfi_def_cfa_offset 4
- 299               		.cfi_offset 1, -3
- 300 0002 0F92      		push r0
- 301               	.LCFI5:
- 302               		.cfi_def_cfa_offset 5
- 303               		.cfi_offset 0, -4
- 304 0004 0FB6      		in r0,__SREG__
- 305 0006 0F92      		push r0
- 306 0008 1124      		clr __zero_reg__
- 307 000a 0BB6      		in r0,__RAMPZ__
- 308 000c 0F92      		push r0
- 309 000e 2F93      		push r18
- 310               	.LCFI6:
- 311               		.cfi_def_cfa_offset 6
- 312               		.cfi_offset 18, -5
- 313 0010 3F93      		push r19
- 314               	.LCFI7:
- 315               		.cfi_def_cfa_offset 7
- 316               		.cfi_offset 19, -6
- 317 0012 4F93      		push r20
- 318               	.LCFI8:
- 319               		.cfi_def_cfa_offset 8
- 320               		.cfi_offset 20, -7
- 321 0014 5F93      		push r21
- 322               	.LCFI9:
- 323               		.cfi_def_cfa_offset 9
- 324               		.cfi_offset 21, -8
- 325 0016 6F93      		push r22
- 326               	.LCFI10:
- 327               		.cfi_def_cfa_offset 10
- 328               		.cfi_offset 22, -9
- 329 0018 7F93      		push r23
- 330               	.LCFI11:
- 331               		.cfi_def_cfa_offset 11
- 332               		.cfi_offset 23, -10
- 333 001a 8F93      		push r24
- 334               	.LCFI12:
- 335               		.cfi_def_cfa_offset 12
- 336               		.cfi_offset 24, -11
- 337 001c 9F93      		push r25
- 338               	.LCFI13:
- 339               		.cfi_def_cfa_offset 13
- 340               		.cfi_offset 25, -12
- 341 001e AF93      		push r26
- 342               	.LCFI14:
- 343               		.cfi_def_cfa_offset 14
- 344               		.cfi_offset 26, -13
- 345 0020 BF93      		push r27
- 346               	.LCFI15:
- 347               		.cfi_def_cfa_offset 15
- 348               		.cfi_offset 27, -14
- 349 0022 EF93      		push r30
- 350               	.LCFI16:
- 351               		.cfi_def_cfa_offset 16
- 352               		.cfi_offset 30, -15
- 353 0024 FF93      		push r31
- 354               	.LCFI17:
- 355               		.cfi_def_cfa_offset 17
- 356               		.cfi_offset 31, -16
- 357               	/* prologue: Signal */
- 358               	/* frame size = 0 */
- 359               	/* stack size = 16 */
- 360               	.L__stack_usage = 16
- 137:raspbee-secbee.c ****     static volatile trx_regval_t trac_status;
- 138:raspbee-secbee.c **** 
- 139:raspbee-secbee.c ****     if (trx_bit_read(SR_AACK_SET_PD)==1)
- 361               		.loc 1 139 0
- 362 0026 45E0      		ldi r20,lo8(5)
- 363 0028 60E2      		ldi r22,lo8(32)
- 364 002a 8EE2      		ldi r24,lo8(46)
- 365 002c 0E94 0000 		call trx_bit_read
- 366               	.LVL28:
- 367 0030 8130      		cpi r24,lo8(1)
- 368 0032 01F0      		breq .+2
- 369 0034 00C0      		rjmp .L21
- 140:raspbee-secbee.c ****     {
- 141:raspbee-secbee.c ****         trx_reg_write(RG_TRX_STATE,CMD_FORCE_TRX_OFF);
- 370               		.loc 1 141 0
- 371 0036 63E0      		ldi r22,lo8(3)
- 372 0038 82E0      		ldi r24,lo8(2)
- 373 003a 0E94 0000 		call trx_reg_write
- 374               	.LVL29:
- 142:raspbee-secbee.c ****         trx_reg_write(RG_TRX_STATE,CMD_TX_ARET_ON);
- 375               		.loc 1 142 0
- 376 003e 69E1      		ldi r22,lo8(25)
- 377 0040 82E0      		ldi r24,lo8(2)
- 378 0042 0E94 0000 		call trx_reg_write
- 379               	.LVL30:
- 380               	.LBB23:
- 381               	.LBB24:
- 382               		.loc 2 163 0
- 383 0046 8AE2      		ldi r24,lo8(42)
- 384 0048 8A95      		1: dec r24
- 385 004a 01F4      		brne 1b
- 386 004c 00C0      		rjmp .
- 387               	.LBE24:
- 388               	.LBE23:
- 143:raspbee-secbee.c **** 
- 144:raspbee-secbee.c ****         DELAY_US(16); /* wait 1 symbol, XXX check this timing */
- 145:raspbee-secbee.c **** 
- 146:raspbee-secbee.c ****         TRX_SLPTR_HIGH();
- 389               		.loc 1 146 0
- 390 004e 8091 3901 		lds r24,313
- 391 0052 8260      		ori r24,lo8(2)
- 392 0054 8093 3901 		sts 313,r24
- 147:raspbee-secbee.c ****         TRX_SLPTR_LOW();
- 393               		.loc 1 147 0
- 394 0058 8091 3901 		lds r24,313
- 395 005c 8D7F      		andi r24,lo8(-3)
- 396 005e 8093 3901 		sts 313,r24
- 148:raspbee-secbee.c **** 
- 149:raspbee-secbee.c ****         trx_frame_write (framelen, txfrm);
- 397               		.loc 1 149 0
- 398 0062 6091 0000 		lds r22,txfrm
- 399 0066 7091 0000 		lds r23,txfrm+1
- 400 006a 8091 0000 		lds r24,framelen
- 401 006e 0E94 0000 		call trx_frame_write
- 402               	.LVL31:
- 150:raspbee-secbee.c **** 
- 151:raspbee-secbee.c ****         trx_bit_write(SR_AACK_SET_PD,0);
- 403               		.loc 1 151 0
- 404 0072 20E0      		ldi r18,0
- 405 0074 45E0      		ldi r20,lo8(5)
- 406 0076 60E2      		ldi r22,lo8(32)
- 407 0078 8EE2      		ldi r24,lo8(46)
- 408 007a 0E94 0000 		call trx_bit_write
- 409               	.LVL32:
- 152:raspbee-secbee.c **** 
- 153:raspbee-secbee.c ****         LED_SET(1);
- 410               		.loc 1 153 0
- 411 007e A29A      		sbi 0x14,2
- 154:raspbee-secbee.c ****         LED_TOGGLE(0);
- 412               		.loc 1 154 0
- 413 0080 8BB1      		in r24,0xb
- 414 0082 8058      		subi r24,lo8(-(-128))
- 415 0084 8BB9      		out 0xb,r24
- 155:raspbee-secbee.c **** 
- 156:raspbee-secbee.c ****         trac_status = trx_bit_read(SR_TRAC_STATUS);
- 416               		.loc 1 156 0
- 417 0086 45E0      		ldi r20,lo8(5)
- 418 0088 60EE      		ldi r22,lo8(-32)
- 419 008a 82E0      		ldi r24,lo8(2)
- 420 008c 0E94 0000 		call trx_bit_read
- 421               	.LVL33:
- 422 0090 8093 0000 		sts trac_status.2614,r24
- 157:raspbee-secbee.c ****         tx_in_progress = false;
- 423               		.loc 1 157 0
- 424 0094 1092 0000 		sts tx_in_progress,__zero_reg__
- 158:raspbee-secbee.c ****         if (trac_status != TRAC_SUCCESS)
- 425               		.loc 1 158 0
- 426 0098 8091 0000 		lds r24,trac_status.2614
- 427 009c 8823      		tst r24
- 428 009e 01F0      		breq .L22
- 159:raspbee-secbee.c ****         {
- 160:raspbee-secbee.c ****             fail_cnt++;
- 429               		.loc 1 160 0
- 430 00a0 8091 0000 		lds r24,fail_cnt
- 431 00a4 8F5F      		subi r24,lo8(-(1))
- 432 00a6 8093 0000 		sts fail_cnt,r24
- 433 00aa 00C0      		rjmp .L20
- 434               	.L22:
- 161:raspbee-secbee.c ****         }
- 162:raspbee-secbee.c ****         else
- 163:raspbee-secbee.c ****         {
- 164:raspbee-secbee.c ****             tx_cnt ++;
- 435               		.loc 1 164 0
- 436 00ac 8091 0000 		lds r24,tx_cnt
- 437 00b0 8F5F      		subi r24,lo8(-(1))
- 438 00b2 8093 0000 		sts tx_cnt,r24
- 165:raspbee-secbee.c ****             LED_CLR(1);
- 439               		.loc 1 165 0
- 440 00b6 A298      		cbi 0x14,2
- 441 00b8 00C0      		rjmp .L20
- 442               	.LVL34:
- 443               	.L21:
- 166:raspbee-secbee.c ****         }
- 167:raspbee-secbee.c ****   }
- 168:raspbee-secbee.c ****   else
- 169:raspbee-secbee.c ****   {
- 170:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_RX_AACK_ON);
- 444               		.loc 1 170 0
- 445 00ba 66E1      		ldi r22,lo8(22)
- 446 00bc 82E0      		ldi r24,lo8(2)
- 447 00be 0E94 0000 		call trx_reg_write
- 448               	.LVL35:
- 449               	.L20:
- 450               	/* epilogue start */
- 171:raspbee-secbee.c ****   }
+ 123:raspbee-secbee.c ****                     //read PAN ID, Channel...
+ 124:raspbee-secbee.c ****                     uint32_t newpanid = (uint32_t)readchar()&((uint32_t)readchar()>>8);
+ 125:raspbee-secbee.c ****                     if(newpanid!=panid)
+ 126:raspbee-secbee.c ****                     {
+ 127:raspbee-secbee.c ****                         PRINTF("New PAN ID: %d\n\r", newpanid);
+ 128:raspbee-secbee.c ****                         trx_reg_write(RG_PAN_ID_0,(panid&0xff));
+ 129:raspbee-secbee.c ****                         trx_reg_write(RG_PAN_ID_1,(panid>>8));
+ 130:raspbee-secbee.c ****                     }
+ 131:raspbee-secbee.c ****                     uint32_t newshortaddr = (uint32_t)readchar()&((uint32_t)readchar()>>8);
+ 132:raspbee-secbee.c ****                     if(newshortaddr!=shortaddr)
+ 133:raspbee-secbee.c ****                     {
+ 134:raspbee-secbee.c ****                         PRINTF("New Short Address: %d\n\r", newshortaddr);
+ 135:raspbee-secbee.c ****                         trx_reg_write(RG_SHORT_ADDR_0,(shortaddr&0xff));
+ 136:raspbee-secbee.c ****                         trx_reg_write(RG_SHORT_ADDR_1,(shortaddr>>8));
+ 137:raspbee-secbee.c ****                     }
+ 138:raspbee-secbee.c ****                     int newchannel = readchar();
+ 139:raspbee-secbee.c ****                     if(newchannel!=channel)
+ 140:raspbee-secbee.c ****                     {
+ 141:raspbee-secbee.c ****                         PRINTF("New Channel: %d\n\r", newshortaddr);
+ 207               		.loc 1 141 0
+ 208 00e0 30E0      		ldi r19,lo8(__c.2610)
+ 209 00e2 E32E      		mov r14,r19
+ 210 00e4 30E0      		ldi r19,hi8(__c.2610)
+ 211 00e6 F32E      		mov r15,r19
+ 134:raspbee-secbee.c ****                         trx_reg_write(RG_SHORT_ADDR_0,(shortaddr&0xff));
+ 212               		.loc 1 134 0
+ 213 00e8 40E0      		ldi r20,lo8(__c.2607)
+ 214 00ea C42E      		mov r12,r20
+ 215 00ec 40E0      		ldi r20,hi8(__c.2607)
+ 216 00ee D42E      		mov r13,r20
+ 127:raspbee-secbee.c ****                         trx_reg_write(RG_PAN_ID_0,(panid&0xff));
+ 217               		.loc 1 127 0
+ 218 00f0 50E0      		ldi r21,lo8(__c.2604)
+ 219 00f2 A52E      		mov r10,r21
+ 220 00f4 50E0      		ldi r21,hi8(__c.2604)
+ 221 00f6 B52E      		mov r11,r21
+ 222               	.L8:
+ 223               	.LBE25:
+ 104:raspbee-secbee.c ****             if (EOF != inchar)
+ 224               		.loc 1 104 0 discriminator 1
+ 225 00f8 0E94 0000 		call hif_getc
+ 226               	.LVL15:
+ 107:raspbee-secbee.c ****                 {
+ 227               		.loc 1 107 0 discriminator 1
+ 228 00fc 8337      		cpi r24,115
+ 229 00fe 9105      		cpc r25,__zero_reg__
+ 230 0100 01F4      		brne .L8
+ 231 0102 0E94 0000 		call readchar
+ 232               	.LVL16:
+ 233 0106 8536      		cpi r24,101
+ 234 0108 9105      		cpc r25,__zero_reg__
+ 235 010a 01F4      		brne .L8
+ 236 010c 0E94 0000 		call readchar
+ 237               	.LVL17:
+ 238 0110 8336      		cpi r24,99
+ 239 0112 9105      		cpc r25,__zero_reg__
+ 240 0114 01F4      		brne .L8
+ 241 0116 0E94 0000 		call readchar
+ 242               	.LVL18:
+ 243 011a 8236      		cpi r24,98
+ 244 011c 9105      		cpc r25,__zero_reg__
+ 245 011e 01F4      		brne .L8
+ 246 0120 0E94 0000 		call readchar
+ 247               	.LVL19:
+ 248 0124 8536      		cpi r24,101
+ 249 0126 9105      		cpc r25,__zero_reg__
+ 250 0128 01F4      		brne .L8
+ 251 012a 0E94 0000 		call readchar
+ 252               	.LVL20:
+ 253 012e 8536      		cpi r24,101
+ 254 0130 9105      		cpc r25,__zero_reg__
+ 255 0132 01F4      		brne .L8
+ 256               	.LBB26:
+ 109:raspbee-secbee.c ****                     //PRINTF("Receiving frame from serial, len: %d\n\r", framelen);
+ 257               		.loc 1 109 0
+ 258 0134 0E94 0000 		call readchar
+ 259               	.LVL21:
+ 260 0138 9093 0000 		sts framelen+1,r25
+ 261 013c 8093 0000 		sts framelen,r24
+ 262               	.LVL22:
+ 113:raspbee-secbee.c ****                     {
+ 263               		.loc 1 113 0
+ 264 0140 4801      		movw r8,r16
+ 265               	.LVL23:
+ 266               	.L12:
+ 113:raspbee-secbee.c ****                     {
+ 267               		.loc 1 113 0 is_stmt 0 discriminator 1
+ 268 0142 8091 0000 		lds r24,framelen
+ 269 0146 9091 0000 		lds r25,framelen+1
+ 270 014a 9401      		movw r18,r8
+ 271 014c 201B      		sub r18,r16
+ 272 014e 310B      		sbc r19,r17
+ 273 0150 2817      		cp r18,r24
+ 274 0152 3907      		cpc r19,r25
+ 275 0154 04F4      		brge .L29
+ 115:raspbee-secbee.c ****                     }
+ 276               		.loc 1 115 0 is_stmt 1 discriminator 2
+ 277 0156 0E94 0000 		call readchar
+ 278               	.LVL24:
+ 279 015a F401      		movw r30,r8
+ 280 015c 8193      		st Z+,r24
+ 281 015e 4F01      		movw r8,r30
+ 282               	.LVL25:
+ 283 0160 00C0      		rjmp .L12
+ 284               	.LVL26:
+ 285               	.L29:
+ 124:raspbee-secbee.c ****                     if(newpanid!=panid)
+ 286               		.loc 1 124 0
+ 287 0162 0E94 0000 		call readchar
+ 288               	.LVL27:
+ 289 0166 4C01      		movw r8,r24
+ 290               	.LVL28:
+ 291 0168 0E94 0000 		call readchar
+ 292               	.LVL29:
+ 293 016c AA27      		clr r26
+ 294 016e 97FD      		sbrc r25,7
+ 295 0170 A095      		com r26
+ 296 0172 BA2F      		mov r27,r26
+ 297 0174 892F      		mov r24,r25
+ 298 0176 9A2F      		mov r25,r26
+ 299 0178 AB2F      		mov r26,r27
+ 300 017a BB27      		clr r27
+ 301 017c A401      		movw r20,r8
+ 302 017e 6627      		clr r22
+ 303 0180 57FD      		sbrc r21,7
+ 304 0182 6095      		com r22
+ 305 0184 762F      		mov r23,r22
+ 306 0186 8423      		and r24,r20
+ 307 0188 9523      		and r25,r21
+ 308 018a A623      		and r26,r22
+ 309 018c B723      		and r27,r23
+ 310               	.LVL30:
+ 125:raspbee-secbee.c ****                     {
+ 311               		.loc 1 125 0
+ 312 018e 863B      		cpi r24,-74
+ 313 0190 F5E3      		ldi r31,53
+ 314 0192 9F07      		cpc r25,r31
+ 315 0194 A105      		cpc r26,__zero_reg__
+ 316 0196 B105      		cpc r27,__zero_reg__
+ 317 0198 01F0      		breq .L14
+ 127:raspbee-secbee.c ****                         trx_reg_write(RG_PAN_ID_0,(panid&0xff));
+ 318               		.loc 1 127 0
+ 319 019a BF93      		push r27
+ 320 019c AF93      		push r26
+ 321 019e 9F93      		push r25
+ 322 01a0 8F93      		push r24
+ 323 01a2 BF92      		push r11
+ 324 01a4 AF92      		push r10
+ 325 01a6 0E94 0000 		call hif_printf
+ 326               	.LVL31:
+ 128:raspbee-secbee.c ****                         trx_reg_write(RG_PAN_ID_1,(panid>>8));
+ 327               		.loc 1 128 0
+ 328 01aa 66EB      		ldi r22,lo8(-74)
+ 329 01ac 82E2      		ldi r24,lo8(34)
+ 330 01ae 0E94 0000 		call trx_reg_write
+ 331               	.LVL32:
+ 129:raspbee-secbee.c ****                     }
+ 332               		.loc 1 129 0
+ 333 01b2 65E3      		ldi r22,lo8(53)
+ 334 01b4 83E2      		ldi r24,lo8(35)
+ 335 01b6 0E94 0000 		call trx_reg_write
+ 336               	.LVL33:
+ 337 01ba 0F90      		pop __tmp_reg__
+ 338 01bc 0F90      		pop __tmp_reg__
+ 339 01be 0F90      		pop __tmp_reg__
+ 340 01c0 0F90      		pop __tmp_reg__
+ 341 01c2 0F90      		pop __tmp_reg__
+ 342 01c4 0F90      		pop __tmp_reg__
+ 343               	.L14:
+ 131:raspbee-secbee.c ****                     if(newshortaddr!=shortaddr)
+ 344               		.loc 1 131 0
+ 345 01c6 0E94 0000 		call readchar
+ 346               	.LVL34:
+ 347 01ca 4C01      		movw r8,r24
+ 348 01cc 0E94 0000 		call readchar
+ 349               	.LVL35:
+ 350 01d0 2C01      		movw r4,r24
+ 351 01d2 6624      		clr r6
+ 352 01d4 57FC      		sbrc r5,7
+ 353 01d6 6094      		com r6
+ 354 01d8 762C      		mov r7,r6
+ 355 01da 452C      		mov r4,r5
+ 356 01dc 562C      		mov r5,r6
+ 357 01de 672C      		mov r6,r7
+ 358 01e0 7724      		clr r7
+ 359 01e2 C401      		movw r24,r8
+ 360 01e4 AA27      		clr r26
+ 361 01e6 97FD      		sbrc r25,7
+ 362 01e8 A095      		com r26
+ 363 01ea BA2F      		mov r27,r26
+ 364 01ec 4822      		and r4,r24
+ 365 01ee 5922      		and r5,r25
+ 366 01f0 6A22      		and r6,r26
+ 367 01f2 7B22      		and r7,r27
+ 368               	.LVL36:
+ 132:raspbee-secbee.c ****                     {
+ 369               		.loc 1 132 0
+ 370 01f4 4114      		cp r4,__zero_reg__
+ 371 01f6 5104      		cpc r5,__zero_reg__
+ 372 01f8 6104      		cpc r6,__zero_reg__
+ 373 01fa 7104      		cpc r7,__zero_reg__
+ 374 01fc 01F0      		breq .L15
+ 134:raspbee-secbee.c ****                         trx_reg_write(RG_SHORT_ADDR_0,(shortaddr&0xff));
+ 375               		.loc 1 134 0
+ 376 01fe 7F92      		push r7
+ 377 0200 6F92      		push r6
+ 378 0202 5F92      		push r5
+ 379 0204 4F92      		push r4
+ 380 0206 DF92      		push r13
+ 381 0208 CF92      		push r12
+ 382 020a 0E94 0000 		call hif_printf
+ 383               	.LVL37:
+ 135:raspbee-secbee.c ****                         trx_reg_write(RG_SHORT_ADDR_1,(shortaddr>>8));
+ 384               		.loc 1 135 0
+ 385 020e 60E0      		ldi r22,0
+ 386 0210 80E2      		ldi r24,lo8(32)
+ 387 0212 0E94 0000 		call trx_reg_write
+ 388               	.LVL38:
+ 136:raspbee-secbee.c ****                     }
+ 389               		.loc 1 136 0
+ 390 0216 60E0      		ldi r22,0
+ 391 0218 81E2      		ldi r24,lo8(33)
+ 392 021a 0E94 0000 		call trx_reg_write
+ 393               	.LVL39:
+ 394 021e 0F90      		pop __tmp_reg__
+ 395 0220 0F90      		pop __tmp_reg__
+ 396 0222 0F90      		pop __tmp_reg__
+ 397 0224 0F90      		pop __tmp_reg__
+ 398 0226 0F90      		pop __tmp_reg__
+ 399 0228 0F90      		pop __tmp_reg__
+ 400               	.L15:
+ 138:raspbee-secbee.c ****                     if(newchannel!=channel)
+ 401               		.loc 1 138 0
+ 402 022a 0E94 0000 		call readchar
+ 403               	.LVL40:
+ 139:raspbee-secbee.c ****                     {
+ 404               		.loc 1 139 0
+ 405 022e 4497      		sbiw r24,20
+ 406 0230 01F0      		breq .L16
+ 407               		.loc 1 141 0
+ 408 0232 7F92      		push r7
+ 409 0234 6F92      		push r6
+ 410 0236 5F92      		push r5
+ 411 0238 4F92      		push r4
+ 412 023a FF92      		push r15
+ 413 023c EF92      		push r14
+ 414 023e 0E94 0000 		call hif_printf
+ 415               	.LVL41:
+ 142:raspbee-secbee.c ****                         trx_bit_write(SR_CHANNEL,channel);
+ 416               		.loc 1 142 0
+ 417 0242 24E1      		ldi r18,lo8(20)
+ 418 0244 40E0      		ldi r20,0
+ 419 0246 6FE1      		ldi r22,lo8(31)
+ 420 0248 88E0      		ldi r24,lo8(8)
+ 421 024a 0E94 0000 		call trx_bit_write
+ 422               	.LVL42:
+ 423 024e 0F90      		pop __tmp_reg__
+ 424 0250 0F90      		pop __tmp_reg__
+ 425 0252 0F90      		pop __tmp_reg__
+ 426 0254 0F90      		pop __tmp_reg__
+ 427 0256 0F90      		pop __tmp_reg__
+ 428 0258 0F90      		pop __tmp_reg__
+ 429               	.L16:
+ 143:raspbee-secbee.c ****                     }
+ 144:raspbee-secbee.c **** 
+ 145:raspbee-secbee.c ****                     trx_bit_write(SR_AACK_SET_PD,1);
+ 430               		.loc 1 145 0
+ 431 025a 21E0      		ldi r18,lo8(1)
+ 432 025c 45E0      		ldi r20,lo8(5)
+ 433 025e 60E2      		ldi r22,lo8(32)
+ 434 0260 8EE2      		ldi r24,lo8(46)
+ 435 0262 0E94 0000 		call trx_bit_write
+ 436               	.LVL43:
+ 146:raspbee-secbee.c **** 
+ 147:raspbee-secbee.c ****                     int i;
+ 148:raspbee-secbee.c ****                     txfrm = malloc(framelen*sizeof(uint8_t));
+ 437               		.loc 1 148 0
+ 438 0266 8090 0000 		lds r8,framelen
+ 439 026a 9090 0000 		lds r9,framelen+1
+ 440 026e C401      		movw r24,r8
+ 441 0270 0E94 0000 		call malloc
+ 442               	.LVL44:
+ 443 0274 8093 0000 		sts txfrm,r24
+ 444 0278 9093 0000 		sts txfrm+1,r25
+ 445               	.LVL45:
+ 446 027c FC01      		movw r30,r24
+ 149:raspbee-secbee.c ****                     for(i=0;i<framelen;i++)
+ 447               		.loc 1 149 0
+ 448 027e D801      		movw r26,r16
+ 449               	.LVL46:
+ 450               	.L17:
+ 451 0280 CD01      		movw r24,r26
+ 452 0282 801B      		sub r24,r16
+ 453 0284 910B      		sbc r25,r17
+ 454               		.loc 1 149 0 is_stmt 0 discriminator 1
+ 455 0286 8815      		cp r24,r8
+ 456 0288 9905      		cpc r25,r9
+ 457 028a 04F0      		brlt .+2
+ 458 028c 00C0      		rjmp .L8
+ 150:raspbee-secbee.c ****                     txfrm[i] = line[i];
+ 459               		.loc 1 150 0 is_stmt 1 discriminator 2
+ 460 028e 8D91      		ld r24,X+
+ 461 0290 8193      		st Z+,r24
+ 462 0292 00C0      		rjmp .L17
+ 463               	.LVL47:
+ 464               	.L7:
+ 465 0294 00C0      		rjmp .L7
+ 466               	.LBE26:
+ 467               		.cfi_endproc
+ 468               	.LFE35:
+ 470               		.text
+ 471               	.global	__vector_63
+ 473               	__vector_63:
+ 474               	.LFB36:
+ 151:raspbee-secbee.c ****                 }
+ 152:raspbee-secbee.c ****             }
+ 153:raspbee-secbee.c ****         }
+ 154:raspbee-secbee.c **** 
+ 155:raspbee-secbee.c ****     }
+ 156:raspbee-secbee.c **** }
+ 157:raspbee-secbee.c **** 
+ 158:raspbee-secbee.c **** #if defined(TRX_IF_RFA1)
+ 159:raspbee-secbee.c **** ISR(TRX24_TX_END_vect)
+ 160:raspbee-secbee.c **** {
+ 475               		.loc 1 160 0
+ 476               		.cfi_startproc
+ 477 000e 1F92      		push r1
+ 478               	.LCFI4:
+ 479               		.cfi_def_cfa_offset 4
+ 480               		.cfi_offset 1, -3
+ 481 0010 0F92      		push r0
+ 482               	.LCFI5:
+ 483               		.cfi_def_cfa_offset 5
+ 484               		.cfi_offset 0, -4
+ 485 0012 0FB6      		in r0,__SREG__
+ 486 0014 0F92      		push r0
+ 487 0016 1124      		clr __zero_reg__
+ 488 0018 0BB6      		in r0,__RAMPZ__
+ 489 001a 0F92      		push r0
+ 490 001c 2F93      		push r18
+ 491               	.LCFI6:
+ 492               		.cfi_def_cfa_offset 6
+ 493               		.cfi_offset 18, -5
+ 494 001e 3F93      		push r19
+ 495               	.LCFI7:
+ 496               		.cfi_def_cfa_offset 7
+ 497               		.cfi_offset 19, -6
+ 498 0020 4F93      		push r20
+ 499               	.LCFI8:
+ 500               		.cfi_def_cfa_offset 8
+ 501               		.cfi_offset 20, -7
+ 502 0022 5F93      		push r21
+ 503               	.LCFI9:
+ 504               		.cfi_def_cfa_offset 9
+ 505               		.cfi_offset 21, -8
+ 506 0024 6F93      		push r22
+ 507               	.LCFI10:
+ 508               		.cfi_def_cfa_offset 10
+ 509               		.cfi_offset 22, -9
+ 510 0026 7F93      		push r23
+ 511               	.LCFI11:
+ 512               		.cfi_def_cfa_offset 11
+ 513               		.cfi_offset 23, -10
+ 514 0028 8F93      		push r24
+ 515               	.LCFI12:
+ 516               		.cfi_def_cfa_offset 12
+ 517               		.cfi_offset 24, -11
+ 518 002a 9F93      		push r25
+ 519               	.LCFI13:
+ 520               		.cfi_def_cfa_offset 13
+ 521               		.cfi_offset 25, -12
+ 522 002c AF93      		push r26
+ 523               	.LCFI14:
+ 524               		.cfi_def_cfa_offset 14
+ 525               		.cfi_offset 26, -13
+ 526 002e BF93      		push r27
+ 527               	.LCFI15:
+ 528               		.cfi_def_cfa_offset 15
+ 529               		.cfi_offset 27, -14
+ 530 0030 EF93      		push r30
+ 531               	.LCFI16:
+ 532               		.cfi_def_cfa_offset 16
+ 533               		.cfi_offset 30, -15
+ 534 0032 FF93      		push r31
+ 535               	.LCFI17:
+ 536               		.cfi_def_cfa_offset 17
+ 537               		.cfi_offset 31, -16
+ 538               	/* prologue: Signal */
+ 539               	/* frame size = 0 */
+ 540               	/* stack size = 16 */
+ 541               	.L__stack_usage = 16
+ 161:raspbee-secbee.c ****     static volatile trx_regval_t trac_status;
+ 162:raspbee-secbee.c **** 
+ 163:raspbee-secbee.c ****     if (trx_bit_read(SR_AACK_SET_PD)==1)
+ 542               		.loc 1 163 0
+ 543 0034 45E0      		ldi r20,lo8(5)
+ 544 0036 60E2      		ldi r22,lo8(32)
+ 545 0038 8EE2      		ldi r24,lo8(46)
+ 546 003a 0E94 0000 		call trx_bit_read
+ 547               	.LVL48:
+ 548 003e 8130      		cpi r24,lo8(1)
+ 549 0040 01F4      		brne .L31
+ 164:raspbee-secbee.c ****     {
+ 165:raspbee-secbee.c ****         trx_reg_write(RG_TRX_STATE,CMD_FORCE_TRX_OFF);
+ 550               		.loc 1 165 0
+ 551 0042 63E0      		ldi r22,lo8(3)
+ 552 0044 82E0      		ldi r24,lo8(2)
+ 553 0046 0E94 0000 		call trx_reg_write
+ 554               	.LVL49:
+ 166:raspbee-secbee.c ****         trx_reg_write(RG_TRX_STATE,CMD_TX_ARET_ON);
+ 555               		.loc 1 166 0
+ 556 004a 69E1      		ldi r22,lo8(25)
+ 557 004c 82E0      		ldi r24,lo8(2)
+ 558 004e 0E94 0000 		call trx_reg_write
+ 559               	.LVL50:
+ 560               	.LBB27:
+ 561               	.LBB28:
+ 562               		.loc 2 163 0
+ 563 0052 8AE2      		ldi r24,lo8(42)
+ 564 0054 8A95      		1: dec r24
+ 565 0056 01F4      		brne 1b
+ 566 0058 00C0      		rjmp .
+ 567               	.LBE28:
+ 568               	.LBE27:
+ 167:raspbee-secbee.c **** 
+ 168:raspbee-secbee.c ****         DELAY_US(16); /* wait 1 symbol, XXX check this timing */
+ 169:raspbee-secbee.c **** 
+ 170:raspbee-secbee.c ****         TRX_SLPTR_HIGH();
+ 569               		.loc 1 170 0
+ 570 005a 8091 3901 		lds r24,313
+ 571 005e 8260      		ori r24,lo8(2)
+ 572 0060 8093 3901 		sts 313,r24
+ 171:raspbee-secbee.c ****         TRX_SLPTR_LOW();
+ 573               		.loc 1 171 0
+ 574 0064 8091 3901 		lds r24,313
+ 575 0068 8D7F      		andi r24,lo8(-3)
+ 576 006a 8093 3901 		sts 313,r24
  172:raspbee-secbee.c **** 
- 173:raspbee-secbee.c **** }
- 451               		.loc 1 173 0
- 452 00c2 FF91      		pop r31
- 453 00c4 EF91      		pop r30
- 454 00c6 BF91      		pop r27
- 455 00c8 AF91      		pop r26
- 456 00ca 9F91      		pop r25
- 457 00cc 8F91      		pop r24
- 458 00ce 7F91      		pop r23
- 459 00d0 6F91      		pop r22
- 460 00d2 5F91      		pop r21
- 461 00d4 4F91      		pop r20
- 462 00d6 3F91      		pop r19
- 463 00d8 2F91      		pop r18
- 464 00da 0F90      		pop r0
- 465 00dc 0BBE      		out __RAMPZ__,r0
- 466 00de 0F90      		pop r0
- 467 00e0 0FBE      		out __SREG__,r0
- 468 00e2 0F90      		pop r0
- 469 00e4 1F90      		pop r1
- 470 00e6 1895      		reti
- 471               		.cfi_endproc
- 472               	.LFE35:
- 474               		.local	trac_status.2614
- 475               		.comm	trac_status.2614,1,1
- 476               		.local	framelen
- 477               		.comm	framelen,2,1
- 478               		.local	txfrm
- 479               		.comm	txfrm,2,1
- 480               		.local	fail_cnt
- 481               		.comm	fail_cnt,1,1
- 482               		.local	tx_cnt
- 483               		.comm	tx_cnt,1,1
- 484               		.local	tx_in_progress
- 485               		.comm	tx_in_progress,1,1
- 486               	.Letext0:
- 487               		.file 3 "/opt/avr8-gnu-toolchain-linux_x86_64/lib/gcc/avr/4.8.1/include/stddef.h"
- 488               		.file 4 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/stdint.h"
- 489               		.file 5 "/opt/uracoli-src-0.4.2/inc/atmega_rfr2.h"
- 490               		.file 6 "/opt/uracoli-src-0.4.2/inc/transceiver.h"
- 491               		.file 7 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/stdlib.h"
- 492               		.file 8 "/opt/uracoli-src-0.4.2/inc/hif.h"
- 493               		.file 9 "/opt/uracoli-src-0.4.2/inc/ioutil.h"
+ 173:raspbee-secbee.c ****         trx_frame_write (framelen, txfrm);
+ 577               		.loc 1 173 0
+ 578 006e 6091 0000 		lds r22,txfrm
+ 579 0072 7091 0000 		lds r23,txfrm+1
+ 580 0076 8091 0000 		lds r24,framelen
+ 581 007a 0E94 0000 		call trx_frame_write
+ 582               	.LVL51:
+ 174:raspbee-secbee.c **** 
+ 175:raspbee-secbee.c ****         trx_bit_write(SR_AACK_SET_PD,0);
+ 583               		.loc 1 175 0
+ 584 007e 20E0      		ldi r18,0
+ 585 0080 45E0      		ldi r20,lo8(5)
+ 586 0082 60E2      		ldi r22,lo8(32)
+ 587 0084 8EE2      		ldi r24,lo8(46)
+ 588 0086 0E94 0000 		call trx_bit_write
+ 589               	.LVL52:
+ 176:raspbee-secbee.c **** 
+ 177:raspbee-secbee.c ****         //LED_SET(1);
+ 178:raspbee-secbee.c ****         //LED_TOGGLE(0);
+ 179:raspbee-secbee.c **** 
+ 180:raspbee-secbee.c ****         trac_status = trx_bit_read(SR_TRAC_STATUS);
+ 590               		.loc 1 180 0
+ 591 008a 45E0      		ldi r20,lo8(5)
+ 592 008c 60EE      		ldi r22,lo8(-32)
+ 593 008e 82E0      		ldi r24,lo8(2)
+ 594 0090 0E94 0000 		call trx_bit_read
+ 595               	.LVL53:
+ 596 0094 8093 0000 		sts trac_status.2625,r24
+ 181:raspbee-secbee.c ****         tx_in_progress = false;
+ 597               		.loc 1 181 0
+ 598 0098 1092 0000 		sts tx_in_progress,__zero_reg__
+ 182:raspbee-secbee.c ****         if (trac_status != TRAC_SUCCESS)
+ 599               		.loc 1 182 0
+ 600 009c 8091 0000 		lds r24,trac_status.2625
+ 601 00a0 8823      		tst r24
+ 602 00a2 01F0      		breq .L32
+ 183:raspbee-secbee.c ****         {
+ 184:raspbee-secbee.c ****             fail_cnt++;
+ 603               		.loc 1 184 0
+ 604 00a4 8091 0000 		lds r24,fail_cnt
+ 605 00a8 8F5F      		subi r24,lo8(-(1))
+ 606 00aa 8093 0000 		sts fail_cnt,r24
+ 607 00ae 00C0      		rjmp .L30
+ 608               	.L32:
+ 185:raspbee-secbee.c ****         }
+ 186:raspbee-secbee.c ****         else
+ 187:raspbee-secbee.c ****         {
+ 188:raspbee-secbee.c ****             tx_cnt ++;
+ 609               		.loc 1 188 0
+ 610 00b0 8091 0000 		lds r24,tx_cnt
+ 611 00b4 8F5F      		subi r24,lo8(-(1))
+ 612 00b6 8093 0000 		sts tx_cnt,r24
+ 613 00ba 00C0      		rjmp .L30
+ 614               	.LVL54:
+ 615               	.L31:
+ 189:raspbee-secbee.c ****             //LED_CLR(1);
+ 190:raspbee-secbee.c ****         }
+ 191:raspbee-secbee.c ****   }
+ 192:raspbee-secbee.c ****   else
+ 193:raspbee-secbee.c ****   {
+ 194:raspbee-secbee.c ****     trx_reg_write(RG_TRX_STATE,CMD_RX_AACK_ON);
+ 616               		.loc 1 194 0
+ 617 00bc 66E1      		ldi r22,lo8(22)
+ 618 00be 82E0      		ldi r24,lo8(2)
+ 619 00c0 0E94 0000 		call trx_reg_write
+ 620               	.LVL55:
+ 621               	.L30:
+ 622               	/* epilogue start */
+ 195:raspbee-secbee.c ****   }
+ 196:raspbee-secbee.c **** 
+ 197:raspbee-secbee.c **** }
+ 623               		.loc 1 197 0
+ 624 00c4 FF91      		pop r31
+ 625 00c6 EF91      		pop r30
+ 626 00c8 BF91      		pop r27
+ 627 00ca AF91      		pop r26
+ 628 00cc 9F91      		pop r25
+ 629 00ce 8F91      		pop r24
+ 630 00d0 7F91      		pop r23
+ 631 00d2 6F91      		pop r22
+ 632 00d4 5F91      		pop r21
+ 633 00d6 4F91      		pop r20
+ 634 00d8 3F91      		pop r19
+ 635 00da 2F91      		pop r18
+ 636 00dc 0F90      		pop r0
+ 637 00de 0BBE      		out __RAMPZ__,r0
+ 638 00e0 0F90      		pop r0
+ 639 00e2 0FBE      		out __SREG__,r0
+ 640 00e4 0F90      		pop r0
+ 641 00e6 1F90      		pop r1
+ 642 00e8 1895      		reti
+ 643               		.cfi_endproc
+ 644               	.LFE36:
+ 646               		.local	trac_status.2625
+ 647               		.comm	trac_status.2625,1,1
+ 648               		.section	.progmem.data,"a",@progbits
+ 651               	__c.2610:
+ 652 0000 4E65 7720 		.string	"New Channel: %d\n\r"
+ 652      4368 616E 
+ 652      6E65 6C3A 
+ 652      2025 640A 
+ 652      0D00 
+ 655               	__c.2607:
+ 656 0012 4E65 7720 		.string	"New Short Address: %d\n\r"
+ 656      5368 6F72 
+ 656      7420 4164 
+ 656      6472 6573 
+ 656      733A 2025 
+ 659               	__c.2604:
+ 660 002a 4E65 7720 		.string	"New PAN ID: %d\n\r"
+ 660      5041 4E20 
+ 660      4944 3A20 
+ 660      2564 0A0D 
+ 660      00
+ 661               		.local	framelen
+ 662               		.comm	framelen,2,1
+ 663               		.local	txfrm
+ 664               		.comm	txfrm,2,1
+ 665               		.local	fail_cnt
+ 666               		.comm	fail_cnt,1,1
+ 667               		.local	tx_cnt
+ 668               		.comm	tx_cnt,1,1
+ 669               		.local	tx_in_progress
+ 670               		.comm	tx_in_progress,1,1
+ 671               		.text
+ 672               	.Letext0:
+ 673               		.file 3 "/opt/avr8-gnu-toolchain-linux_x86_64/lib/gcc/avr/4.8.1/include/stddef.h"
+ 674               		.file 4 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/stdint.h"
+ 675               		.file 5 "/opt/uracoli-src-0.4.2/inc/atmega_rfr2.h"
+ 676               		.file 6 "/opt/uracoli-src-0.4.2/inc/hif.h"
+ 677               		.file 7 "/opt/uracoli-src-0.4.2/inc/transceiver.h"
+ 678               		.file 8 "/opt/avr8-gnu-toolchain-linux_x86_64/avr/include/stdlib.h"
+ 679               		.file 9 "/opt/uracoli-src-0.4.2/inc/ioutil.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 raspbee-secbee.c
-     /tmp/cc73hEFM.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/cc73hEFM.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/cc73hEFM.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/cc73hEFM.s:5      *ABS*:000000000000003b __RAMPZ__
-     /tmp/cc73hEFM.s:6      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/cc73hEFM.s:7      *ABS*:0000000000000001 __zero_reg__
-     /tmp/cc73hEFM.s:14     .text.startup:0000000000000000 main
-     /tmp/cc73hEFM.s:481    .bss:0000000000000006 tx_cnt
-     /tmp/cc73hEFM.s:483    .bss:0000000000000007 tx_in_progress
-     /tmp/cc73hEFM.s:475    .bss:0000000000000001 framelen
-     /tmp/cc73hEFM.s:477    .bss:0000000000000003 txfrm
-     /tmp/cc73hEFM.s:292    .text:0000000000000000 __vector_63
-                             .bss:0000000000000000 trac_status.2614
-     /tmp/cc73hEFM.s:479    .bss:0000000000000005 fail_cnt
+     /tmp/ccOI4Cph.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccOI4Cph.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccOI4Cph.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccOI4Cph.s:5      *ABS*:000000000000003b __RAMPZ__
+     /tmp/ccOI4Cph.s:6      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccOI4Cph.s:7      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccOI4Cph.s:13     .text:0000000000000000 readchar
+     /tmp/ccOI4Cph.s:40     .text.startup:0000000000000000 main
+     /tmp/ccOI4Cph.s:666    .bss:0000000000000006 tx_cnt
+     /tmp/ccOI4Cph.s:668    .bss:0000000000000007 tx_in_progress
+     /tmp/ccOI4Cph.s:651    .progmem.data:0000000000000000 __c.2610
+     /tmp/ccOI4Cph.s:655    .progmem.data:0000000000000012 __c.2607
+     /tmp/ccOI4Cph.s:659    .progmem.data:000000000000002a __c.2604
+     /tmp/ccOI4Cph.s:647    .bss:0000000000000001 framelen
+     /tmp/ccOI4Cph.s:662    .bss:0000000000000003 txfrm
+     /tmp/ccOI4Cph.s:473    .text:000000000000000e __vector_63
+                             .bss:0000000000000000 trac_status.2625
+     /tmp/ccOI4Cph.s:664    .bss:0000000000000005 fail_cnt
 
 UNDEFINED SYMBOLS
+hif_getc
 trx_io_init
 trx_reg_write
 trx_bit_read
 trx_bit_write
 hif_init
-hif_getc
+hif_printf
 malloc
 trx_frame_write
 __do_clear_bss
