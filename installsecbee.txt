@@ -1,0 +1,90 @@
+#How to Install SecBee for ZigBee
+
+#Install Dependencies
+ sudo apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
+ 
+ sudo apt-get install build-essential cmake git libboost-dev libboost-date-time-dev \
+       libboost-system-dev libboost-filesystem-dev libboost-thread-dev libboost-chrono-dev \
+       libboost-serialization-dev libboost-program-options-dev libboost-test-dev \
+       liblog4cpp5-dev libblas-dev liblapack-dev \
+       libarmadillo-dev libgflags-dev libgoogle-glog-dev libgnutls-openssl-dev libgtest-dev
+       
+#Install PyBOMBS
+git clone git://github.com/pybombs/pybombs cd pybombs
+
+#configure PyBOMBS
+sudo ./pybombs config
+#skip (enter) everything EXCEPT prefix: /usr/local
+
+#Install GNURadio & UHD
+sudo ./pybombs install uhd gnuradio
+#Attention: can take several decades
+
+#create setup shellscript
+sudo ./pybombs env
+cd /usr/local
+sudo chmod +x setup_env.sh
+
+=======================================================================================================================
+
+#How to use GNURadio
+#always set environment variables first
+. /usr/local/setup_env.sh
+#Attention this environment variable is only valid for this terminal
+gnuradio-companion
+
+#How to check if USRP is working
+#replace ethX with your interface
+sudo ifconfig ethX 192.168.10.1
+uhd_find_device
+uhd_usrp_probe
+
+
+=======================================================================================================================
+#How to install SecBee
+
+#Dependencies
+sudo apt-get install python-tk
+sudo apt-get wireshark
+
+#Scapy: https://bitbucket.org/cybertools/scapy-radio/src
+#download, unpack
+./install.sh
+
+#ignore all errors regarding grcc (gnuradio should be > 3.7.5 so grc_s are in inconsistent state)
+
+#killerbee: https://github.com/riverloopsec/killerbee
+#download, unpack
+sudo python setup.py install
+
+#IEE 802.15.4 Block: https://github.com/bastibl/gr-ieee802-15-4
+git clone git://github.com/bastibl/gr-ieee802-15-4.git
+cd gr-ieee802-15-4
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+sudo ldconfig
+
+#SecBee
+#download, unpack
+#copy Scapy folder from github to scapy destination sudo cp -a -r Scapy/. /usr/local/lib/python2.7/dist-packages/scapy/
+
+#Maybe copy to another path in the future
+
+cd Zigbee Crypto
+sudo cp zigbee_crypto.so /usr/local/lib/zigbee_crypto.so sudo cp zigbee_transkey.so /usr/local/lib/zigbee_transkey.so
+
+
+#in /usr/local/setup_env.sh: add /usr/local/lib to PYTHONPATH
+
+#to start SecBee allways set the environment variable first by the above mentioned command:
+. /usr/local/setup_env.sh
+
+#move to SecBee-master/Source folder and start
+python SecBee.py 
+
+#The programm should start now 
+
+# by Zallmann and Zimmer
