@@ -1,4 +1,4 @@
-#How to Install SecBee for ZigBee
+#How to Install SecBee for Ubuntu
 
 #Install Dependencies
  sudo apt-get install python-gtk2 python-cairo python-usb python-crypto python-serial python-dev libgcrypt-dev
@@ -88,3 +88,4 @@ python SecBee.py
 #The programm should start now 
 
 # by Zallmann and Zimmer
+# HGI-EMSEC/PHYSEC GmbH
